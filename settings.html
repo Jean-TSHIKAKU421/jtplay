@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JTPlay - Paramètres</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <header class="header">
+        <div class="header-container">
+            <a href="home.html" class="logo">
+                <i class="fas fa-film"></i>
+                <span>JTPlay</span>
+            </a>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="settings-page">
+            <div class="page-header">
+                <h1><i class="fas fa-cog"></i> Paramètres</h1>
+                <p>Personnalisez votre expérience</p>
+            </div>
+
+            <div class="settings-container">
+                <!-- Profil -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h2>Profil</h2>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="profile-info">
+                            <div class="profile-avatar">
+                                <span id="profileInitial">J</span>
+                            </div>
+                            <div class="profile-details">
+                                <h3 id="profileName">Jean Dupont</h3>
+                                <p id="profileEmail">jean@email.com</p>
+                            </div>
+                        </div>
+                        <button class="btn-settings">Modifier le profil</button>
+                    </div>
+                </div>
+
+                <!-- Apparence -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <i class="fas fa-paint-brush"></i>
+                        <h2>Apparence</h2>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Mode sombre</h4>
+                                <p>Activer le thème sombre</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkModeToggle" onchange="toggleTheme()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Taille du texte</h4>
+                                <p>Ajuster la taille de la police</p>
+                            </div>
+                            <div class="font-controls">
+                                <button onclick="changeFontSize(-1)">A-</button>
+                                <span id="fontSizeDisplay">100%</span>
+                                <button onclick="changeFontSize(1)">A+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Téléchargements -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <i class="fas fa-download"></i>
+                        <h2>Téléchargements</h2>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Qualité par défaut</h4>
+                                <p>Qualité vidéo des téléchargements</p>
+                            </div>
+                            <select class="settings-select">
+                                <option>SD (480p)</option>
+                                <option selected>HD (720p)</option>
+                                <option>Full HD (1080p)</option>
+                                <option>4K (2160p)</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>WiFi uniquement</h4>
+                                <p>Télécharger seulement en WiFi</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compte -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <i class="fas fa-shield-alt"></i>
+                        <h2>Sécurité</h2>
+                    </div>
+                    <div class="settings-card-body">
+                        <button class="btn-settings btn-full">
+                            <i class="fas fa-key"></i> Changer le mot de passe
+                        </button>
+                        <button class="btn-settings btn-full btn-danger" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Accueil</span>
+        </a>
+        <a href="downloads.html" class="nav-item">
+            <i class="fas fa-download"></i>
+            <span>Downloads</span>
+        </a>
+        <a href="settings.html" class="nav-item active">
+            <i class="fas fa-cog"></i>
+            <span>Paramètres</span>
+        </a>
+        <a href="about.html" class="nav-item">
+            <i class="fas fa-info-circle"></i>
+            <span>À propos</span>
+        </a>
+    </nav>
+
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script>
+        // Charger les infos du profil
+        const user = getCurrentUser();
+        if (user) {
+            document.getElementById('profileName').textContent = user.name;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('profileInitial').textContent = user.name.charAt(0).toUpperCase();
+        }
+    </script>
+</body>
+</html>

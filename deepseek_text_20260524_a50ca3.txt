@@ -1,0 +1,10 @@
+cinevault/
+├── index.html
+├── css/
+│   └── style.css
+├── js/
+│   └── main.js
+├── data/
+│   └── datas.json
+├── admin.html
+└── README.md

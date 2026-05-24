@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JTPlay - Administration</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <header class="header admin-header">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>Admin Panel</span>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Quitter
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="admin-page">
+            <div class="admin-sidebar">
+                <h3>Gestion</h3>
+                <button class="sidebar-btn active" data-section="films">
+                    <i class="fas fa-film"></i> Films
+                </button>
+                <button class="sidebar-btn" data-section="users">
+                    <i class="fas fa-users"></i> Utilisateurs
+                </button>
+                <button class="sidebar-btn" data-section="stats">
+                    <i class="fas fa-chart-bar"></i> Statistiques
+                </button>
+            </div>
+
+            <div class="admin-content" id="adminContent">
+                <!-- Section Films -->
+                <div class="admin-section active" id="filmsSection">
+                    <div class="section-top">
+                        <h2>Gestion des films</h2>
+                        <button class="btn-add" onclick="showAddFilmForm()">
+                            <i class="fas fa-plus"></i> Ajouter un film
+                        </button>
+                    </div>
+                    <div class="films-table" id="filmsTable">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Section Utilisateurs -->
+                <div class="admin-section" id="usersSection">
+                    <h2>Utilisateurs inscrits</h2>
+                    <div class="users-table" id="usersTable">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Section Statistiques -->
+                <div class="admin-section" id="statsSection">
+                    <h2>Statistiques</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <i class="fas fa-film"></i>
+                            <span class="stat-value" id="totalFilms">0</span>
+                            <span class="stat-label">Films</span>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-value" id="totalUsers">0</span>
+                            <span class="stat-label">Utilisateurs</span>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-download"></i>
+                            <span class="stat-value" id="totalDownloads">0</span>
+                            <span class="stat-label">Téléchargements</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Ajout/Modification Film -->
+    <div class="modal" id="adminModal">
+        <div class="modal-overlay" onclick="closeAdminModal()"></div>
+        <div class="modal-content admin-modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Ajouter un film</h3>
+                <button class="modal-close" onclick="closeAdminModal()">&times;</button>
+            </div>
+            <form id="filmForm" onsubmit="handleFilmSubmit(event)">
+                <input type="hidden" id="filmId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Titre *</label>
+                        <input type="text" id="filmTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Genre *</label>
+                        <select id="filmGenre" required>
+                            <option value="">Sélectionner...</option>
+                            <option>Action</option>
+                            <option>Science-Fiction</option>
+                            <option>Drame</option>
+                            <option>Thriller</option>
+                            <option>Animation</option>
+                            <option>Comédie</option>
+                            <option>Horreur</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Année *</label>
+                        <input type="number" id="filmYear" min="1900" max="2030" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Durée *</label>
+                        <input type="text" id="filmDuration" placeholder="2h30" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="number" id="filmRating" min="0" max="10" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>URL Affiche *</label>
+                    <input type="url" id="filmPoster" required>
+                </div>
+                <div class="form-group">
+                    <label>Réalisateur</label>
+                    <input type="text" id="filmDirector">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="filmDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Casting (séparé par des virgules)</label>
+                    <input type="text" id="filmCast" placeholder="Acteur 1, Acteur 2, Acteur 3">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAdminModal()">Annuler</button>
+                    <button type="submit" class="btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/films.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

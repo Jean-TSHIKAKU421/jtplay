@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JTPlay - Accueil</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="home.html" class="logo">
+                <i class="fas fa-film"></i>
+                <span>JTPlay</span>
+            </a>
+            
+            <div class="header-actions">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Rechercher un film, un genre...">
+                </div>
+                
+                <button class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                
+                <div class="user-menu">
+                    <span class="user-name" id="userName"></span>
+                    <button class="btn-logout" onclick="logout()" title="Déconnexion">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero" style="background-image: url('images/dune2.jpg');">
+            <div class="hero-content">
+                <span class="hero-badge">🔥 Tendance</span>
+                <h1>Dune: Part Two</h1>
+                <p>Paul Atreides s'unit aux Fremen pour libérer Arrakis des griffes des Harkonnen.</p>
+                <div class="hero-meta">
+                    <span><i class="fas fa-star"></i> 8.9</span>
+                    <span><i class="fas fa-clock"></i> 2h46</span>
+                    <span><i class="fas fa-calendar"></i> 2024</span>
+                    <span class="hero-genre">Science-Fiction</span>
+                </div>
+                <button class="btn-play" onclick="scrollToFilm(1)">
+                    <i class="fas fa-play"></i> Bande annonce
+                </button>
+            </div>
+        </section>
+
+        <!-- Catégories principales -->
+        <section class="categories-section">
+            <div class="categories-scroll" id="mainCategories">
+                <button class="category-btn active" data-type="all">Tout</button>
+                <button class="category-btn" data-type="film">Mono-film</button>
+                <button class="category-btn" data-type="serie">Séries</button>
+            </div>
+        </section>
+
+        <!-- Sous-catégories (genres) -->
+        <section class="categories-section" id="subCategoriesSection" style="display: none;">
+            <div class="categories-scroll" id="subCategories">
+                <button class="category-btn active" data-genre="all">Tous</button>
+                <button class="category-btn" data-genre="Action">Action</button>
+                <button class="category-btn" data-genre="Science-Fiction">Science-Fiction</button>
+                <button class="category-btn" data-genre="Drame">Drame</button>
+                <button class="category-btn" data-genre="Thriller">Thriller</button>
+                <button class="category-btn" data-genre="Animation">Animation</button>
+                <button class="category-btn" data-genre="Comédie">Comédie</button>
+                <button class="category-btn" data-genre="Horreur">Horreur</button>
+            </div>
+        </section>
+
+        <!-- Films Grid -->
+        <section class="films-section">
+            <div class="section-header">
+                <h2>Films Populaires</h2>
+                <div class="films-count" id="filmsCount"></div>
+            </div>
+            <div class="films-grid" id="filmsGrid">
+                <!-- Chargé dynamiquement -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Loader -->
+    <div id="pageLoader" style="
+        position: fixed;
+        inset: 0;
+        background: var(--bg-primary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+    ">
+        <div style="
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 1rem;
+        "></div>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">Chargement de vos films...</p>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .film-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        
+        .film-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Accueil</span>
+        </a>
+        <a href="downloads.html" class="nav-item">
+            <i class="fas fa-download"></i>
+            <span>Downloads</span>
+        </a>
+        <a href="settings.html" class="nav-item">
+            <i class="fas fa-cog"></i>
+            <span>Paramètres</span>
+        </a>
+        <a href="about.html" class="nav-item">
+            <i class="fas fa-info-circle"></i>
+            <span>À propos</span>
+        </a>
+    </nav>
+
+    <!-- Film Detail Modal -->
+    <div class="modal" id="filmModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-body">
+                <!-- Chargé dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/films.js"></script>
+    <script src="js/theme.js"></script>
+</body>
+</html>

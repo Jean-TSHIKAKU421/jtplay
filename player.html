@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JTPlay - Lecture</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .player-page {
+            min-height: 100vh;
+            background: #000;
+        }
+        
+        .player-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .player-header .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .player-header .back-btn:hover {
+            color: var(--primary);
+        }
+        
+        .player-header .film-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .video-container video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+        
+        .film-details {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem 2rem;
+            color: white;
+        }
+        
+        .film-details h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .film-details .meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .film-details .description {
+            color: #ccc;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="player-page">
+        <div class="player-header">
+            <a href="home.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <span class="film-title" id="playerTitle">Chargement...</span>
+            <div></div>
+        </div>
+        
+        <div class="video-container">
+            <video id="videoPlayer" controls autoplay>
+                <source src="" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture vidéo.
+            </video>
+        </div>
+        
+        <div class="film-details" id="filmDetails">
+            <!-- Rempli dynamiquement -->
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Vérifier l'authentification
+        if (!isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+        
+        // Récupérer l'ID du film depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const filmId = urlParams.get('id');
+        
+        if (!filmId) {
+            window.location.href = 'home.html';
+        }
+        
+        // Charger les données du film
+        async function loadPlayer() {
+            const FILMS_KEY = 'jtplay_films';
+            let films = [];
+            
+            const stored = localStorage.getItem(FILMS_KEY);
+            if (stored) {
+                films = JSON.parse(stored);
+            } else {
+                try {
+                    const response = await fetch('data/films.json');
+                    const data = await response.json();
+                    films = data.films || [];
+                } catch (error) {
+                    console.error('Erreur:', error);
+                }
+            }
+            
+            const film = films.find(f => f.id === parseInt(filmId));
+            
+            if (!film) {
+                window.location.href = 'home.html';
+                return;
+            }
+            
+            // Mettre à jour le titre
+            document.getElementById('playerTitle').textContent = film.title;
+            document.title = `JTPlay - ${film.title}`;
+            
+            // Charger la vidéo
+            const video = document.getElementById('videoPlayer');
+            video.src = film.video || '';
+            
+            // Afficher les détails
+            document.getElementById('filmDetails').innerHTML = `
+                <h2>${film.title}</h2>
+                <div class="meta">
+                    <span><i class="fas fa-star" style="color: #FFD700;"></i> ${film.rating}</span>
+                    <span>${film.year}</span>
+                    <span>${film.genre}</span>
+                    <span>${film.duration}</span>
+                </div>
+                <p class="description">${film.description || 'Aucune description disponible.'}</p>
+                ${film.director ? `<p style="margin-top: 0.5rem; color: #aaa;"><strong>Réalisateur:</strong> ${film.director}</p>` : ''}
+            `;
+        }
+        
+        loadPlayer();
+    </script>
+</body>
+</html>
