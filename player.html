@@ -3,14 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JTPlay - Lecture</title>
+    <title>CinéVault - Lecture</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --player-bg: #000;
+            --player-header-bg: rgba(0,0,0,0.95);
+            --player-text: #fff;
+            --player-details-bg: #111;
+            --player-meta: #aaa;
+            --player-description: #ccc;
+        }
+        
+        [data-theme="light"] {
+            --player-bg: #f5f5f5;
+            --player-header-bg: #fff;
+            --player-text: #1a1a2e;
+            --player-details-bg: #fff;
+            --player-meta: #666;
+            --player-description: #444;
+        }
+        
         .player-page {
             min-height: 100vh;
-            background: #000;
+            background: var(--player-bg);
+            display: flex;
+            flex-direction: column;
         }
         
         .player-header {
@@ -18,25 +44,31 @@
             align-items: center;
             justify-content: space-between;
             padding: 1rem 2rem;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            background: var(--player-header-bg);
+            color: var(--player-text);
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
         }
         
         .player-header .back-btn {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: white;
+            color: var(--player-text);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.95rem;
+            transition: color 0.2s;
         }
         
         .player-header .back-btn:hover {
-            color: var(--primary);
+            color: #E50914;
+        }
+        
+        .player-header .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
         
         .player-header .film-title {
@@ -44,76 +76,411 @@
             font-weight: 600;
         }
         
+        .theme-toggle-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(128,128,128,0.2);
+            color: var(--player-text);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .theme-toggle-btn:hover {
+            background: rgba(128,128,128,0.4);
+        }
+        
         .video-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
         }
         
         .video-container video {
             width: 100%;
-            border-radius: 8px;
+            max-height: 100%;
+            object-fit: contain;
             background: #000;
         }
         
-        .film-details {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem 2rem;
+        .video-controls {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 1.5rem;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .video-container:hover .video-controls {
+            opacity: 1;
+        }
+        
+        .control-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.7);
             color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+        
+        .control-btn:hover {
+            background: #E50914;
+            transform: scale(1.15);
+        }
+        
+        .progress-bar-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            z-index: 10;
+            transition: height 0.2s ease;
+        }
+        
+        .progress-bar-container:hover {
+            height: 8px;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: #E50914;
+            width: 0%;
+            transition: width 0.1s linear;
+            border-radius: 0 2px 2px 0;
+            position: relative;
+        }
+        
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            background: #E50914;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 0 6px rgba(229, 9, 20, 0.6);
+        }
+        
+        .progress-bar-container:hover .progress-bar-fill::after {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+        }
+        
+        .progress-bar-container:hover .progress-bar-fill {
+            box-shadow: 0 0 8px rgba(229, 9, 20, 0.6);
+        }
+        
+        .time-display {
+            position: absolute;
+            bottom: 12px;
+            left: 16px;
+            color: white;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .progress-bar-container:hover ~ .time-display,
+        .video-container:hover .time-display {
+            opacity: 1;
+        }
+        
+        .time-total {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            color: white;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .progress-bar-container:hover ~ .time-total,
+        .video-container:hover .time-total {
+            opacity: 1;
+        }
+        
+        .film-details {
+            padding: 1.5rem 2rem;
+            background: var(--player-details-bg);
+            color: var(--player-text);
+            flex-shrink: 0;
         }
         
         .film-details h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            margin-bottom: 0.75rem;
         }
         
         .film-details .meta {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1rem;
-            color: #aaa;
+            margin-bottom: 0.75rem;
+            color: var(--player-meta);
             font-size: 0.9rem;
+            flex-wrap: wrap;
         }
         
         .film-details .description {
-            color: #ccc;
+            color: var(--player-description);
             line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .film-details .director {
+            margin-top: 0.5rem;
+            color: var(--player-meta);
+            font-size: 0.9rem;
+        }
+
+        /* Section épisodes */
+        .episodes-section {
+            padding: 0 2rem 2rem;
+            background: var(--player-details-bg);
+            color: var(--player-text);
+        }
+        
+        .episodes-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .episode-card {
+            background: rgba(128,128,128,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+        }
+        
+        .episode-card:hover {
+            background: rgba(229, 9, 20, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .episode-card.active {
+            border: 2px solid #E50914;
+            background: rgba(229, 9, 20, 0.15);
+        }
+        
+        .episode-thumb {
+            width: 120px;
+            height: 100px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #000;
+            flex-shrink: 0;
+        }
+        
+        .episode-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .episode-info .ep-number {
+            font-size: 0.8rem;
+            color: var(--player-meta);
+            margin-bottom: 0.25rem;
+        }
+        
+        .episode-info .ep-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .episode-info .ep-duration {
+            font-size: 0.8rem;
+            color: var(--player-meta);
+        }
+
+        /* Mode plein écran */
+        .player-page.fullscreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+        }
+        
+        .player-page.fullscreen .player-header,
+        .player-page.fullscreen .film-details,
+        .player-page.fullscreen .episodes-section {
+            display: none;
+        }
+        
+        .player-page.fullscreen .video-container {
+            position: fixed;
+            inset: 0;
+        }
+        
+        .player-page.fullscreen .video-controls {
+            bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .player-header {
+                padding: 0.75rem 1rem;
+            }
+            
+            .player-header .back-btn {
+                font-size: 0.85rem;
+            }
+            
+            .player-header .film-title {
+                font-size: 0.95rem;
+            }
+            
+            .video-container {
+                height: 30vh;
+                flex: none;
+            }
+            
+            .video-container video {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+            
+            .video-controls {
+                opacity: 1;
+                gap: 1.25rem;
+            }
+            
+            .control-btn {
+                width: 56px;
+                height: 56px;
+                font-size: 1.2rem;
+            }
+            
+            .film-details {
+                padding: 1rem;
+            }
+            
+            .film-details h2 {
+                font-size: 1.2rem;
+            }
+            
+            .film-details .description {
+                font-size: 0.9rem;
+            }
+            
+            .episodes-section {
+                padding: 0 1rem 1rem;
+            }
+            
+            .episodes-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<body>
+<body data-theme="dark">
     
-    <div class="player-page">
+    <div class="player-page" id="playerPage">
         <div class="player-header">
             <a href="home.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Retour
             </a>
             <span class="film-title" id="playerTitle">Chargement...</span>
-            <div></div>
+            <div class="header-right">
+                <button class="theme-toggle-btn" onclick="togglePlayerTheme()" title="Changer le thème">
+                    <i class="fas fa-sun" id="themeIcon"></i>
+                </button>
+            </div>
         </div>
         
-        <div class="video-container">
-            <video id="videoPlayer" controls autoplay>
+        <div class="video-container" id="videoContainer">
+            <video id="videoPlayer" autoplay>
                 <source src="" type="video/mp4">
                 Votre navigateur ne supporte pas la lecture vidéo.
             </video>
+            
+            <div class="progress-bar-container" id="progressBarContainer">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <span class="time-display" id="currentTime">00:00</span>
+            <span class="time-total" id="totalTime">00:00</span>
+            
+            <div class="video-controls">
+                <button class="control-btn" id="rewindBtn" title="-10 secondes">
+                    <i class="fas fa-backward"></i>
+                </button>
+                <button class="control-btn" id="playPauseBtn" title="Pause">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button class="control-btn" id="fullscreenBtn" title="Plein écran">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="control-btn" id="forwardBtn" title="+10 secondes">
+                    <i class="fas fa-forward"></i>
+                </button>
+            </div>
         </div>
         
         <div class="film-details" id="filmDetails">
             <!-- Rempli dynamiquement -->
         </div>
+        
+        <!-- Section épisodes (affichée uniquement pour les séries) -->
+        <div class="episodes-section" id="episodesSection" style="display: none;">
+            <h3><i class="fas fa-list-ul"></i> Épisodes</h3>
+            <div class="episodes-grid" id="episodesGrid"></div>
+        </div>
     </div>
 
     <script src="js/auth.js"></script>
     <script>
-        // Vérifier l'authentification
         if (!isLoggedIn()) {
             window.location.href = 'index.html';
         }
         
-        // Récupérer l'ID du film depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         const filmId = urlParams.get('id');
         
@@ -121,9 +488,232 @@
             window.location.href = 'home.html';
         }
         
-        // Charger les données du film
+        // Éléments vidéo et contrôles
+        const video = document.getElementById('videoPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const rewindBtn = document.getElementById('rewindBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        const playerPage = document.getElementById('playerPage');
+        
+        // Éléments de progression
+        const progressBarContainer = document.getElementById('progressBarContainer');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const currentTimeDisplay = document.getElementById('currentTime');
+        const totalTimeDisplay = document.getElementById('totalTime');
+        
+        let isFullscreen = false;
+        let currentFilm = null;       // Stocke les données du film/série
+        let currentEpisode = null;    // Épisode en cours (si série)
+        
+        // Initialiser le thème
+        function initPlayerTheme() {
+            const savedTheme = localStorage.getItem('cinevault_theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            updatePlayerThemeIcon(savedTheme);
+        }
+        
+        function togglePlayerTheme() {
+            const current = document.body.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('cinevault_theme', next);
+            updatePlayerThemeIcon(next);
+        }
+        
+        function updatePlayerThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+        
+        initPlayerTheme();
+        
+        // Formater le temps
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Barre de progression
+        video.addEventListener('timeupdate', () => {
+            if (video.duration) {
+                const progress = (video.currentTime / video.duration) * 100;
+                progressBarFill.style.width = progress + '%';
+                currentTimeDisplay.textContent = formatTime(video.currentTime);
+            }
+        });
+        
+        video.addEventListener('loadedmetadata', () => {
+            totalTimeDisplay.textContent = formatTime(video.duration);
+        });
+        
+        progressBarContainer.addEventListener('click', (e) => {
+            const rect = progressBarContainer.getBoundingClientRect();
+            const ratio = (e.clientX - rect.left) / rect.width;
+            video.currentTime = ratio * video.duration;
+        });
+        
+        let isDragging = false;
+        progressBarContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = progressBarContainer.getBoundingClientRect();
+            video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const rect = progressBarContainer.getBoundingClientRect();
+                const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                video.currentTime = (x / rect.width) * video.duration;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => { isDragging = false; });
+        
+        progressBarContainer.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const rect = progressBarContainer.getBoundingClientRect();
+            video.currentTime = ((e.touches[0].clientX - rect.left) / rect.width) * video.duration;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                const rect = progressBarContainer.getBoundingClientRect();
+                const x = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
+                video.currentTime = (x / rect.width) * video.duration;
+            }
+        });
+        
+        document.addEventListener('touchend', () => { isDragging = false; });
+        
+        // Contrôles
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                playPauseBtn.title = 'Pause';
+            } else {
+                video.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                playPauseBtn.title = 'Play';
+            }
+        });
+        
+        video.addEventListener('ended', () => {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            playPauseBtn.title = 'Play';
+        });
+        
+        video.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                playPauseBtn.title = 'Pause';
+            } else {
+                video.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                playPauseBtn.title = 'Play';
+            }
+        });
+        
+        rewindBtn.addEventListener('click', () => {
+            video.currentTime = Math.max(0, video.currentTime - 10);
+        });
+        
+        forwardBtn.addEventListener('click', () => {
+            video.currentTime = Math.min(video.duration, video.currentTime + 10);
+        });
+        
+        fullscreenBtn.addEventListener('click', () => {
+            if (!isFullscreen) {
+                playerPage.classList.add('fullscreen');
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                fullscreenBtn.title = 'Redimensionner';
+                isFullscreen = true;
+            } else {
+                playerPage.classList.remove('fullscreen');
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                fullscreenBtn.title = 'Plein écran';
+                isFullscreen = false;
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isFullscreen) {
+                playerPage.classList.remove('fullscreen');
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                fullscreenBtn.title = 'Plein écran';
+                isFullscreen = false;
+            }
+            if (e.key === ' ' && document.activeElement === document.body) {
+                e.preventDefault();
+                if (video.paused) {
+                    video.play();
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    video.pause();
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                video.currentTime = Math.max(0, video.currentTime - 10);
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                video.currentTime = Math.min(video.duration, video.currentTime + 10);
+            }
+        });
+        
+        // Changer d'épisode
+        function loadEpisode(episode) {
+            currentEpisode = episode;
+            video.src = episode.video;
+            video.play();
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            document.getElementById('playerTitle').textContent = `${currentFilm.title} - ${episode.title}`;
+            document.title = `CinéVault - ${episode.title}`;
+            
+            // Mettre à jour l'affichage des détails de l'épisode
+            document.getElementById('filmDetails').innerHTML = `
+                <h2>${episode.title}</h2>
+                <div class="meta">
+                    <span>Saison ${episode.season}, Épisode ${episode.episodeNumber}</span>
+                    <span>${episode.duration}</span>
+                </div>
+                <p class="description">${episode.description || ''}</p>
+            `;
+            
+            // Mettre en évidence l'épisode actif dans la liste
+            document.querySelectorAll('.episode-card').forEach(card => card.classList.remove('active'));
+            const activeCard = document.querySelector(`.episode-card[data-episode-id="${episode.episodeNumber}"]`);
+            if (activeCard) activeCard.classList.add('active');
+        }
+        
+        // Construire la liste des épisodes
+        function buildEpisodesList(episodes) {
+            const grid = document.getElementById('episodesGrid');
+            grid.innerHTML = episodes.map(ep => `
+                <div class="episode-card" data-episode-id="${ep.episodeNumber}" onclick="loadEpisode(${JSON.stringify(ep).replace(/"/g, '&quot;')})">
+                    <img src="${ep.poster}" class="episode-thumb" onerror="this.src='https://via.placeholder.com/120x68?text=No+Image'">
+                    <div class="episode-info">
+                        <div class="ep-number">S${ep.season} E${ep.episodeNumber}</div>
+                        <div class="ep-title">${ep.title}</div>
+                        <div class="ep-duration">${ep.duration}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('episodesSection').style.display = 'block';
+        }
+        
+        // Chargement initial
         async function loadPlayer() {
-            const FILMS_KEY = 'jtplay_films';
+            const FILMS_KEY = 'cinevault_films';
             let films = [];
             
             const stored = localStorage.getItem(FILMS_KEY);
@@ -140,32 +730,37 @@
             }
             
             const film = films.find(f => f.id === parseInt(filmId));
-            
             if (!film) {
                 window.location.href = 'home.html';
                 return;
             }
             
-            // Mettre à jour le titre
-            document.getElementById('playerTitle').textContent = film.title;
-            document.title = `JTPlay - ${film.title}`;
+            currentFilm = film;
             
-            // Charger la vidéo
-            const video = document.getElementById('videoPlayer');
-            video.src = film.video || '';
-            
-            // Afficher les détails
-            document.getElementById('filmDetails').innerHTML = `
-                <h2>${film.title}</h2>
-                <div class="meta">
-                    <span><i class="fas fa-star" style="color: #FFD700;"></i> ${film.rating}</span>
-                    <span>${film.year}</span>
-                    <span>${film.genre}</span>
-                    <span>${film.duration}</span>
-                </div>
-                <p class="description">${film.description || 'Aucune description disponible.'}</p>
-                ${film.director ? `<p style="margin-top: 0.5rem; color: #aaa;"><strong>Réalisateur:</strong> ${film.director}</p>` : ''}
-            `;
+            // Si c'est une série avec des épisodes
+            if (film.type === 'serie' && film.episodes && film.episodes.length > 0) {
+                buildEpisodesList(film.episodes);
+                // Charger le premier épisode
+                loadEpisode(film.episodes[0]);
+            } else {
+                // Film unique
+                document.getElementById('episodesSection').style.display = 'none';
+                video.src = film.video || '';
+                document.getElementById('playerTitle').textContent = film.title;
+                document.title = `CinéVault - ${film.title}`;
+                
+                document.getElementById('filmDetails').innerHTML = `
+                    <h2>${film.title}</h2>
+                    <div class="meta">
+                        <span><i class="fas fa-star" style="color: #FFD700;"></i> ${film.rating}</span>
+                        <span>${film.year}</span>
+                        <span>${film.genre}</span>
+                        <span>${film.duration}</span>
+                    </div>
+                    <p class="description">${film.description || 'Aucune description disponible.'}</p>
+                    ${film.director ? `<p class="director"><strong>Réalisateur:</strong> ${film.director}</p>` : ''}
+                `;
+            }
         }
         
         loadPlayer();
