@@ -694,15 +694,16 @@ button {
 
 .films-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 1.5rem;
 }
 
 .film-card {
     background: var(--bg-card);
     border-radius: var(--radius-lg);
+    box-shadow: 2px 5px 8px rgba(0,0,0,0.5);
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
+    /* box-shadow: var(--shadow-sm); */
     cursor: pointer;
     transition: var(--transition);
     position: relative;
@@ -710,7 +711,8 @@ button {
 
 .film-card:hover {
     transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
+    /* box-shadow: var(--shadow-lg); */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 .film-poster {
