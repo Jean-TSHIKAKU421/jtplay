@@ -1,0 +1,25 @@
+{
+  "name": "cine",
+  "version": "1.0.0",
+  "description": "cinevault/\r ├── index.html\r ├── home.html\r ├── downloads.html\r ├── settings.html\r ├── about.html\r ├── admin.html\r ├── css/\r │   └── style.css\r ├── js/\r │   ├── auth.js\r │   ├── films.js\r │   ├── theme.js\r │   └── downloads.js\r └── data/\r     ├── users.json\r     └── films.json",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jean-TSHIKAKU421/jtplay.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Jean-TSHIKAKU421/jtplay/issues"
+  },
+  "homepage": "https://github.com/Jean-TSHIKAKU421/jtplay#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

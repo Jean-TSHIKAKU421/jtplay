@@ -31,6 +31,14 @@
       "password": "paul123",
       "createdAt": "2026-05-25T00:00:52.316Z",
       "isAdmin": false
+    },
+    {
+      "id": "1779710539026",
+      "name": "Jacques MUZALA",
+      "email": "jacquesmuzala@gmail.com",
+      "password": "jacques1234",
+      "createdAt": "2026-05-25T12:02:19.026Z",
+      "isAdmin": false
     }
   ]
 }

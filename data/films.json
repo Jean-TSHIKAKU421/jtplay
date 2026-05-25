@@ -2,20 +2,49 @@
   "films": [
     {
       "id": 1,
-      "title": "Dune: Part Two",
-      "poster": "sources/dune2.jpg",
+      "title": "Dune Prophétie S1",
+      "poster": "sources/dune1.jpg",
       "video": "sources/video.mp4",
-      "type": "film",
+      "type": "serie",
       "rating": 8.9,
       "year": 2024,
       "genre": "Science-Fiction",
-      "duration": "2h46",
+      "duration": "~50 min/Ep",
       "description": "Paul Atreides s'unit aux Fremen pour libérer Arrakis des griffes des Harkonnen.",
       "director": "Denis Villeneuve",
       "cast": [
         "Timothée Chalamet",
         "Zendaya",
         "Rebecca Ferguson"
+      ],
+      "episodes": [
+        {
+          "episodeNumber": 1,
+          "season": 1,
+          "title": "Dune Saison 1 Episode 2 - Épisode 1",
+          "duration": "1h00",
+          "poster": "sources/dune1.jpg",
+          "video": "sources/video.mp4",
+          "description": "Paul Atreides s'unit aux Fremen pour libérer Arrakis des griffes des Harkonnen."
+        },
+        {
+          "episodeNumber": 2,
+          "season": 1,
+          "title": "Dune Saison 1 Episode 2 - Épisode 2",
+          "duration": "51 min",
+          "poster": "sources/dune2.jpg",
+          "video": "sources/video.mp4",
+          "description": "Paul Atreides s'unit aux Fremen pour libérer Arrakis des griffes des Harkonnen."
+        },
+        {
+          "episodeNumber": 3,
+          "season": 1,
+          "title": "Dune Saison 1 Episode 2 - Épisode 3",
+          "duration": "51 min",
+          "poster": "sources/dune3.jpg",
+          "video": "sources/video.mp4",
+          "description": "Paul Atreides s'unit aux Fremen pour libérer Arrakis des griffes des Harkonnen."
+        }
       ]
     },
     {
@@ -110,24 +139,6 @@
     },
     {
       "id": 7,
-      "title": "Joker",
-      "poster": "sources/joker.jpg",
-      "video": "sources/video.mp4",
-      "type": "film",
-      "rating": 8.4,
-      "year": 2019,
-      "genre": "Drame",
-      "duration": "2h02",
-      "description": "Arthur Fleck, un comédien raté, bascule dans la folie et devient le Joker.",
-      "director": "Todd Phillips",
-      "cast": [
-        "Joaquin Phoenix",
-        "Robert De Niro",
-        "Zazie Beetz"
-      ]
-    },
-    {
-      "id": 8,
       "title": "Stranger Things Saison 1",
       "poster": "sources/stranger_things.jpg",
       "type": "serie",
@@ -200,7 +211,7 @@
       ]
     },
     {
-      "id": 9,
+      "id": 8,
       "title": "The last of us",
       "type": "serie",
       "genre": "Horreur",
@@ -253,6 +264,104 @@
           "description": "Joel et Elie font face à des bandits"
         }
       ]
+    },
+    {
+      "id": 9,
+      "title": "King Kong",
+      "type": "film",
+      "genre": "Science-Fiction",
+      "year": 2005,
+      "duration": "1h30",
+      "rating": 6.9,
+      "poster": "sources/king_kong3.jpg",
+      "director": "Peter Jackson",
+      "description": "C'est un film qui raconte l'histoire d'un héro Gorille, mais qui est discriminé par les humains ...",
+      "cast": [
+        "Fran Walsh",
+        "Philippa Boyens",
+        "Peter Jackson",
+        "Merian C.",
+        "Cooper based",
+        "Edgar Wallace",
+        "etc."
+      ],
+      "video": "sources/video.mp4"
+    },
+    {
+      "id": 10,
+      "title": "Into the badlands",
+      "type": "serie",
+      "genre": "Action",
+      "year": 2022,
+      "rating": 8.2,
+      "poster": "sources/into_the_badlands_s1_e1.jpg",
+      "director": " Alfred Gough et Miles Millar",
+      "description": "Into the Badlands est une série post-apocalyptique américaine mêlant arts martiaux, drame et fantastique, centrée sur le guerrier Sunny et un jeune garçon nommé M.K. dans un monde contrôlé par sept barons rivaux...",
+      "cast": [
+        "Daniel Wu",
+        "Emily Beecham",
+        "Marton Csokas",
+        "Aramis Knight",
+        "etc."
+      ],
+      "episodes": [
+        {
+          "episodeNumber": 1,
+          "season": 1,
+          "title": "Into the badlands - Épisode 1",
+          "duration": "52min",
+          "poster": "sources/into_the_badlands_s1_e1.jpg",
+          "video": "sources/video.mp4",
+          "description": "Into the Badlands est une série post-apocalyptique américaine mêlant arts martiaux, drame et fantastique, centrée sur le guerrier Sunny et un jeune garçon nommé M.K. dans un monde contrôlé par sept barons rivaux..."
+        },
+        {
+          "episodeNumber": 2,
+          "season": 1,
+          "title": "Into the badlands - Épisode 2",
+          "duration": "48min",
+          "poster": "sources/into_the_badlands_s1_e2.jpg",
+          "video": "sources/video.mp4",
+          "description": "Into the Badlands est une série post-apocalyptique américaine mêlant arts martiaux, drame et fantastique, centrée sur le guerrier Sunny et un jeune garçon nommé M.K. dans un monde contrôlé par sept barons rivaux..."
+        },
+        {
+          "episodeNumber": 3,
+          "season": 1,
+          "title": "Into the badlands - Épisode 3",
+          "duration": "45min",
+          "poster": "sources/into_the_badlands_s1_e3.jpg",
+          "video": "sources/video.mp4",
+          "description": "Into the Badlands est une série post-apocalyptique américaine mêlant arts martiaux, drame et fantastique, centrée sur le guerrier Sunny et un jeune garçon nommé M.K. dans un monde contrôlé par sept barons rivaux..."
+        },
+        {
+          "episodeNumber": 4,
+          "season": 1,
+          "title": "Into the badlands - Épisode 4",
+          "duration": "45min",
+          "poster": "sources/into_the_badlands_s1_e4.jpg",
+          "video": "sources/video.mp4",
+          "description": "Into the Badlands est une série post-apocalyptique américaine mêlant arts martiaux, drame et fantastique, centrée sur le guerrier Sunny et un jeune garçon nommé M.K. dans un monde contrôlé par sept barons rivaux..."
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Joker",
+      "type": "film",
+      "genre": "Action",
+      "year": 2021,
+      "duration": "1h25",
+      "rating": 7.1,
+      "poster": "sources/joker.jpg",
+      "director": "Peter Jackson",
+      "description": "C'est un film marrant",
+      "cast": [
+        "Daniel Wu",
+        "Emily Beecham",
+        "Marton Csokas",
+        "Aramis Knight",
+        "etc."
+      ],
+      "video": "sources/video.mp4"
     }
   ]
 }

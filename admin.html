@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CinéVault - Administration</title>
+    <title>JTPlay - Administration</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* Styles spécifiques à l'admin */
+       
         .admin-page {
             display: flex;
-            min-height: calc(100vh - 70px);
+            height: calc(100vh - 70px);   /* Hauteur restante après le header */
             background: var(--bg-primary);
         }
-        
+
         .admin-sidebar {
             width: 260px;
             background: var(--bg-card);
@@ -23,7 +24,19 @@
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100%;                 /* Prend toute la hauteur du parent */
+            overflow-y: auto;            /* Défilement interne si nécessaire (peu probable) */
         }
+
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;            /* Le contenu défile indépendamment */
+            background: var(--bg-secondary);
+        }
+
         
         .admin-sidebar-header {
             padding: 0 1.5rem 1.5rem;
@@ -89,12 +102,7 @@
             border-radius: 0 3px 3px 0;
         }
         
-        .admin-content {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            background: var(--bg-secondary);
-        }
+        
         
         .admin-section {
             display: none;
@@ -275,15 +283,21 @@
         @media (max-width: 768px) {
             .admin-page {
                 flex-direction: column;
+                height: auto;
             }
-            
             .admin-sidebar {
+                position: static;
                 width: 100%;
+                height: auto;
                 flex-direction: row;
                 overflow-x: auto;
                 padding: 0.75rem;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
+            }
+            .admin-content {
+                height: auto;
+                overflow-y: visible;
             }
             
             .admin-sidebar-header {
@@ -300,10 +314,6 @@
             
             .sidebar-btn.active::before {
                 display: none;
-            }
-            
-            .admin-content {
-                padding: 1.5rem 1rem;
             }
             
             .section-top {
@@ -360,15 +370,24 @@
             <!-- Section Films -->
             <div class="admin-section active" id="filmsSection">
                 <div class="section-top">
-                    <h2>🎥 Gestion des films</h2>
-                    <button class="btn-add" onclick="showAddFilmForm()">
-                        <i class="fas fa-plus"></i> Ajouter un film
-                    </button>
-                    <button class="btn-export" onclick="exportFilmsJSON()">
-                        <i class="fas fa-download"></i> Exporter films.json
-                    </button>
-                    <input type="file" id="importFilmsFile" accept=".json" style="display:none" onchange="importFilmsJSON(event)">
+                    <h2>Gestion des films</h2>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn-export" onclick="refreshFilmIds()">
+                            <i class="fas fa-sync-alt"></i> Rafraîchir les IDs
+                        </button>
+                        <button class="btn-add" onclick="showAddFilmForm()">
+                            <i class="fas fa-plus"></i> Ajouter un film
+                        </button>
+                        <button class="btn-export" onclick="exportFilmsJSON()">
+                            <i class="fas fa-download"></i> Exporter films.json
+                        </button>
+                        <button class="btn-export" onclick="document.getElementById('importFilmsFile').click()">
+                            <i class="fas fa-upload"></i> Importer films.json
+                        </button>
+                        <input type="file" id="importFilmsFile" accept=".json" style="display:none" onchange="importFilmsJSON(event)">
+                    </div>
                 </div>
+
                 <div class="admin-table-wrapper">
                     <table class="admin-table" id="filmsTable">
                         <thead>
@@ -380,6 +399,7 @@
                                 <th>Genre</th>
                                 <th>Année</th>
                                 <th>Note</th>
+                                <th>Épisodes</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -393,7 +413,7 @@
             <!-- Section Utilisateurs -->
             <div class="admin-section" id="usersSection">
                 <div class="section-top">
-                    <h2>👥 Utilisateurs inscrits</h2>
+                    <h2>Utilisateurs inscrits</h2>
                 </div>
                 <div class="admin-table-wrapper">
                     <table class="admin-table">
@@ -410,22 +430,22 @@
                     </table>
                 </div>
                 <div style="margin-top: 1.5rem; text-align: right;">
-                <div class="sauvegarde">
-                    <button class="btn-add" onclick="exportUsersJSON()">
-                        <i class="fas fa-download"></i> Exporter les utilisateurs (JSON)
-                    </button>
-                    <button class="btn-add" onclick="document.getElementById('importUsersFile').click()">
-                        <i class="fas fa-upload"></i> Importer utilisateurs.json
-                    </button>
-                    <input type="file" id="importUsersFile" accept=".json" style="display:none" onchange="importUsersJSON(event)">
+                    <div class="sauvegarde">
+                        <button class="btn-add" onclick="exportUsersJSON()">
+                            <i class="fas fa-download"></i> Exporter les utilisateurs (JSON)
+                        </button>
+                        <button class="btn-add" onclick="document.getElementById('importUsersFile').click()">
+                            <i class="fas fa-upload"></i> Importer utilisateurs.json
+                        </button>
+                        <input type="file" id="importUsersFile" accept=".json" style="display:none" onchange="importUsersJSON(event)">
+                    </div>
                 </div>
-            </div>
             </div>
 
             <!-- Section Statistiques -->
             <div class="admin-section" id="statsSection">
                 <div class="section-top">
-                    <h2>📊 Statistiques</h2>
+                    <h2>Statistiques</h2>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-box">
@@ -515,25 +535,25 @@
                 <div class="form-group">
                     <label>Affiche *</label>
                     <div class="file-input-wrapper">
-                        <input type="text" id="filmPoster" readonly placeholder="images/monfilm.jpg" required>
+                        <input type="text" id="filmPoster" readonly placeholder="sources/monfilm.jpg" required>
                         <button type="button" class="btn-file" onclick="document.getElementById('posterFileInput').click()">
                             <i class="fas fa-folder-open"></i> Choisir
                         </button>
                         <input type="file" id="posterFileInput" accept="image/*" style="display:none" onchange="handleFileSelect('poster')">
                     </div>
-                    <small>Placez l'image dans le dossier <code>images/</code> puis sélectionnez-la.</small>
+                    <small>Placez l'image dans le dossier <code>sources/</code> puis sélectionnez-la.</small>
                 </div>
 
                 <div class="form-group" id="videoGroup">
                     <label>Vidéo *</label>
                     <div class="file-input-wrapper">
-                        <input type="text" id="filmVideo" readonly placeholder="videos/monfilm.mp4" required>
+                        <input type="text" id="filmVideo" readonly placeholder="sources/mavideo.mp4" required>
                         <button type="button" class="btn-file" onclick="document.getElementById('videoFileInput').click()">
                             <i class="fas fa-folder-open"></i> Choisir
                         </button>
                         <input type="file" id="videoFileInput" accept="video/*" style="display:none" onchange="handleFileSelect('video')">
                     </div>
-                    <small>Placez la vidéo dans le dossier <code>videos/</code> puis sélectionnez-la.</small>
+                    <small>Placez la vidéo dans le dossier <code>sources/</code> puis sélectionnez-la.</small>
                 </div>
                 <div class="form-group">
                     <label>Réalisateur</label>
@@ -555,10 +575,90 @@
         </div>
     </div>
 
+    <!-- Modal Gestion des épisodes -->
+    <div class="modal" id="episodeModal">
+        <div class="modal-overlay" onclick="closeEpisodeModal()"></div>
+        <div class="modal-content admin-modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="episodeModalTitle">Épisodes de la série</h3>
+                <button class="modal-close" onclick="closeEpisodeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Vue liste -->
+                <div id="episodesListView">
+                    <div id="episodesList" style="margin-bottom: 1.5rem;"></div>
+                    <button class="btn-add" onclick="showAddEpisodeForm()">
+                        <i class="fas fa-plus"></i> Ajouter un épisode
+                    </button>
+                </div>
+
+                <!-- Vue détaillée d'un épisode -->
+                <div id="episodeDetailView" style="display: none;">
+                    <button class="btn-back" onclick="showEpisodesList()">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </button>
+                    <div class="episode-detail-content" id="episodeDetailContent"></div>
+                </div>
+
+                <!-- Formulaire d'ajout/modification d'épisode -->
+                <div id="episodeForm" style="display:none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <h4 id="episodeFormTitle">Nouvel épisode</h4>
+                    <form onsubmit="submitEpisode(event)">
+                        <input type="hidden" id="editEpisodeIndex" value="-1">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>N° Épisode *</label>
+                                <input type="number" id="epNumber" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Saison *</label>
+                                <input type="number" id="epSeason" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Titre de l'épisode *</label>
+                            <input type="text" id="epTitle" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Durée *</label>
+                                <input type="text" id="epDuration" placeholder="ex: 42min" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Affiche (poster)</label>
+                                <input type="text" id="epPoster" placeholder="sources/episode.jpg">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Vidéo *</label>
+                            <input type="text" id="epVideo" placeholder="sources/episode.mp4" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="epDescription" rows="2"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" onclick="hideEpisodeForm()">Annuler</button>
+                            <button type="submit" class="btn-save">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/auth.js"></script>
     <script src="js/films.js"></script>
     <script src="js/theme.js"></script>
     <script>
+
+        async function refreshFilmIds() {
+            if (!confirm('Réindexer tous les IDs de 1 à N ?')) return;
+            filmManager.reindexIds();
+            await filmManager.save();
+            alert('✅ IDs mis à jour !');
+            loadFilmsTable();
+        }
 
         function importFilmsJSON(event) {
             const file = event.target.files[0];
@@ -603,13 +703,12 @@
         function handleFileSelect(type) {
             const inputId = type === 'poster' ? 'posterFileInput' : 'videoFileInput';
             const targetId = type === 'poster' ? 'filmPoster' : 'filmVideo';
-            const folder = type === 'poster' ? 'images/' : 'videos/';
             const fileInput = document.getElementById(inputId);
             const targetInput = document.getElementById(targetId);
 
             if (fileInput.files.length > 0) {
                 const fileName = fileInput.files[0].name;
-                targetInput.value = folder + fileName;
+                targetInput.value = 'sources/' + fileName;
             }
         }
 
@@ -703,6 +802,9 @@
                     <td>${f.genre}</td>
                     <td>${f.year}</td>
                     <td>⭐ ${f.rating}</td>
+                    <td>
+                        ${f.type === 'serie' ? `<button class="btn-icon-sm" onclick="openEpisodeModal(${f.id})" title="Gérer les épisodes"><i class="fas fa-list-ul"></i></button>` : '-'}
+                    </td>
                     <td>
                         <div class="table-actions">
                             <button class="btn-icon-sm" onclick="editFilm(${f.id})" title="Modifier"><i class="fas fa-edit"></i></button>
@@ -869,6 +971,205 @@
             // Charger la section active par défaut (Films)
             loadFilmsTable();
         });
+
+        let currentSerieId = null;
+
+        // Ouvre le modal des épisodes pour une série donnée
+        function openEpisodeModal(serieId) {
+            currentSerieId = serieId;
+            const serie = filmManager.getById(serieId);
+            if (!serie) return;
+            document.getElementById('episodeModalTitle').textContent = `Épisodes de ${serie.title}`;
+            renderEpisodesList(serie);
+            hideEpisodeForm();
+            document.getElementById('episodeModal').classList.add('active');
+        }
+
+        function closeEpisodeModal() {
+            document.getElementById('episodeModal').classList.remove('active');
+            currentSerieId = null;
+        }
+
+        // Affiche la liste des épisodes
+        function renderEpisodesList(serie) {
+            const listDiv = document.getElementById('episodesList');
+            const episodes = serie.episodes || [];
+            if (episodes.length === 0) {
+                listDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Aucun épisode pour cette série.</p>';
+                return;
+            }
+            listDiv.innerHTML = `<div class="episodes-grid">` + episodes.map((ep, index) => `
+                <div class="episode-card">
+                    <img src="${ep.poster || 'https://via.placeholder.com/100x70?text=No+Image'}" class="episode-thumb" onerror="this.src='https://via.placeholder.com/100x70'">
+                    <div class="episode-details">
+                        <div class="ep-badge">S${ep.season} • E${ep.episodeNumber}</div>
+                        <div class="ep-title">${ep.title}</div>
+                        <div class="ep-meta">
+                            <span><i class="fas fa-clock"></i> ${ep.duration}</span>
+                        </div>
+                    </div>
+                    <div class="episode-actions">
+                        <button class="btn-icon-sm" onclick="event.stopPropagation(); editEpisode(${index})" title="Modifier"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon-sm" onclick="event.stopPropagation(); deleteEpisode(${index})" title="Supprimer"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('') + `</div>`;
+        }
+
+        // Affiche le formulaire d'ajout/modification d'épisode
+        function showAddEpisodeForm() {
+            document.getElementById('episodeForm').style.display = 'block';
+            document.getElementById('episodeFormTitle').textContent = 'Nouvel épisode';
+            document.getElementById('editEpisodeIndex').value = '-1';
+            document.getElementById('epNumber').value = '';
+            document.getElementById('epSeason').value = '1';
+            document.getElementById('epTitle').value = '';
+            document.getElementById('epDuration').value = '';
+            document.getElementById('epPoster').value = '';
+            document.getElementById('epVideo').value = '';
+            document.getElementById('epDescription').value = '';
+        }
+
+        // Prépare l'édition d'un épisode existant
+        function editEpisode(index) {
+            const serie = filmManager.getById(currentSerieId);
+            if (!serie || !serie.episodes) return;
+            const ep = serie.episodes[index];
+            document.getElementById('episodeForm').style.display = 'block';
+            document.getElementById('episodeFormTitle').textContent = 'Modifier l\'épisode';
+            document.getElementById('editEpisodeIndex').value = index;
+            document.getElementById('epNumber').value = ep.episodeNumber;
+            document.getElementById('epSeason').value = ep.season;
+            document.getElementById('epTitle').value = ep.title;
+            document.getElementById('epDuration').value = ep.duration;
+            document.getElementById('epPoster').value = ep.poster || '';
+            document.getElementById('epVideo').value = ep.video || '';
+            document.getElementById('epDescription').value = ep.description || '';
+        }
+
+        function hideEpisodeForm() {
+            document.getElementById('episodeForm').style.display = 'none';
+        }
+
+        // Soumission du formulaire d'épisode
+        async function submitEpisode(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('editEpisodeIndex').value);
+            const episodeData = {
+                episodeNumber: parseInt(document.getElementById('epNumber').value),
+                season: parseInt(document.getElementById('epSeason').value),
+                title: document.getElementById('epTitle').value,
+                duration: document.getElementById('epDuration').value,
+                poster: document.getElementById('epPoster').value,
+                video: document.getElementById('epVideo').value,
+                description: document.getElementById('epDescription').value
+            };
+
+            if (index === -1) {
+                // Ajout
+                await filmManager.addEpisode(currentSerieId, episodeData);
+            } else {
+                // Modification
+                await filmManager.updateEpisode(currentSerieId, index, episodeData);
+            }
+
+            // Rafraîchir la liste
+            const serie = filmManager.getById(currentSerieId);
+            renderEpisodesList(serie);
+            hideEpisodeForm();
+        }
+
+        // Suppression d'un épisode
+        async function deleteEpisode(index) {
+            if (!confirm('Supprimer cet épisode ?')) return;
+            await filmManager.deleteEpisode(currentSerieId, index);
+            const serie = filmManager.getById(currentSerieId);
+            renderEpisodesList(serie);
+            // Mettre à jour le tableau principal des films si nécessaire (la durée globale peut changer, mais ce n'est pas géré ici)
+        }
+        
+        // Affiche le détail d'un épisode
+        function showEpisodeDetail(index) {
+            const serie = filmManager.getById(currentSerieId);
+            if (!serie || !serie.episodes) return;
+            const ep = serie.episodes[index];
+            if (!ep) return;
+
+            // Cacher la liste et le formulaire, afficher la vue détail
+            document.getElementById('episodesListView').style.display = 'none';
+            document.getElementById('episodeForm').style.display = 'none';
+            document.getElementById('episodeDetailView').style.display = 'block';
+
+            const detailDiv = document.getElementById('episodeDetailContent');
+            detailDiv.innerHTML = `
+                <div class="episode-detail-content">
+                    <img src="${ep.poster || 'https://via.placeholder.com/250x140?text=No+Image'}" 
+                        class="episode-detail-poster" 
+                        onerror="this.src='https://via.placeholder.com/250x140'">
+                    <div class="episode-detail-info">
+                        <h2>${ep.title}</h2>
+                        <div class="episode-detail-meta">
+                            <span><strong>Saison ${ep.season} • Épisode ${ep.episodeNumber}</strong></span>
+                            <span><i class="fas fa-clock"></i> ${ep.duration}</span>
+                        </div>
+                        <p style="margin-bottom: 1rem; line-height: 1.6;">${ep.description || 'Aucune description.'}</p>
+                        <div class="episode-actions" style="position: static; opacity: 1; margin-top: 1rem;">
+                            <button class="btn-icon-sm" onclick="event.stopPropagation(); editEpisode(${index})"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon-sm" onclick="event.stopPropagation(); deleteEpisode(${index})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Retourne à la liste des épisodes
+        function showEpisodesList() {
+            document.getElementById('episodesListView').style.display = 'block';
+            document.getElementById('episodeDetailView').style.display = 'none';
+            document.getElementById('episodeForm').style.display = 'none';
+            // Rafraîchir la liste au cas où
+            const serie = filmManager.getById(currentSerieId);
+            renderEpisodesList(serie);
+        }
+
+        // Modifier la fonction renderEpisodesList pour inclure le onclick
+        function renderEpisodesList(serie) {
+            const listDiv = document.getElementById('episodesList');
+            const episodes = serie.episodes || [];
+            if (episodes.length === 0) {
+                listDiv.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Aucun épisode pour cette série.</p>';
+                return;
+            }
+            listDiv.innerHTML = `<div class="episodes-grid">` + episodes.map((ep, index) => `
+                <div class="episode-card" onclick="showEpisodeDetail(${index})">
+                    <img src="${ep.poster || 'https://via.placeholder.com/100x70?text=No+Image'}" class="episode-thumb" onerror="this.src='https://via.placeholder.com/100x70'">
+                    <div class="episode-details">
+                        <div class="ep-badge">S${ep.season} • E${ep.episodeNumber}</div>
+                        <div class="ep-title">${ep.title}</div>
+                        <div class="ep-meta">
+                            <span><i class="fas fa-clock"></i> ${ep.duration}</span>
+                        </div>
+                    </div>
+                    <div class="episode-actions" onclick="event.stopPropagation()">
+                        <button class="btn-icon-sm" onclick="editEpisode(${index})" title="Modifier"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon-sm" onclick="deleteEpisode(${index})" title="Supprimer"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('') + `</div>`;
+        }
+
+        // Ajuster la fonction openEpisodeModal pour cacher la vue détail et le formulaire au départ
+        function openEpisodeModal(serieId) {
+            currentSerieId = serieId;
+            const serie = filmManager.getById(serieId);
+            if (!serie) return;
+            document.getElementById('episodeModalTitle').textContent = `Épisodes de ${serie.title}`;
+            document.getElementById('episodesListView').style.display = 'block';
+            document.getElementById('episodeDetailView').style.display = 'none';
+            document.getElementById('episodeForm').style.display = 'none';
+            renderEpisodesList(serie);
+            document.getElementById('episodeModal').classList.add('active');
+        }
     </script>
 </body>
 </html>

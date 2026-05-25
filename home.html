@@ -117,10 +117,22 @@
 
         <!-- Catégories principales -->
         <section class="categories-section">
-            <div class="categories-scroll" id="mainCategories">
-                <button class="category-btn active" data-type="all">Tout</button>
-                <button class="category-btn" data-type="film">Mono-film</button>
-                <button class="category-btn" data-type="serie">Séries</button>
+            <div class="categories-bar">
+                <div class="categories-scroll" id="mainCategories">
+                    <button class="category-btn active" data-type="all">Tout</button>
+                    <button class="category-btn" data-type="film">Mono-film</button>
+                    <button class="category-btn" data-type="serie">Séries</button>
+                </div>
+                <div class="sort-wrapper">
+                    <button class="sort-btn" id="sortBtn">
+                        <i class="fas fa-sort"></i> Trie
+                    </button>
+                    <div class="sort-dropdown" id="sortDropdown">
+                        <button class="sort-option active" data-sort="date">Par date</button>
+                        <button class="sort-option" data-sort="name">Par nom</button>
+                        <button class="sort-option" data-sort="rating">Par note</button>
+                    </div>
+                </div>
             </div>
         </section>
 

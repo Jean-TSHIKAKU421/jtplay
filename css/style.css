@@ -730,6 +730,92 @@ button {
     border-color: var(--primary);
 }
 
+/* Barre de catégories + tri */
+.categories-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.sort-wrapper {
+    position: relative;
+}
+
+.sort-btn {
+    padding: 0.6rem 1.2rem;
+    border: 2px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.sort-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.sort-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 160px;
+    z-index: 20;
+    display: none;
+    overflow: hidden;
+}
+
+.sort-dropdown.show {
+    display: block;
+}
+
+.sort-option {
+    width: 100%;
+    padding: 0.7rem 1.2rem;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.sort-option:hover {
+    background: var(--bg-hover);
+}
+
+.sort-option.active {
+    color: var(--primary);
+    font-weight: 600;
+    background: rgba(229, 9, 20, 0.05);
+}
+
+/* Responsive : sur mobile, on peut empiler */
+@media (max-width: 768px) {
+    .categories-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .sort-wrapper {
+        align-self: flex-end;
+    }
+}
+
+
 /* ============================================
    FILMS GRID
    ============================================ */
@@ -1763,6 +1849,25 @@ button {
     color: var(--primary);
 }
 
+.btn-export {
+    padding: 0.7rem 1.4rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+.btn-export:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
 .modal-header {
     padding: 1.5rem;
     border-bottom: 1px solid var(--border);
@@ -1909,6 +2014,154 @@ small code {
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-size: 0.85em;
+}
+
+.episode-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+.episode-item .ep-info {
+    flex: 1;
+}
+.episode-item .ep-actions button {
+    margin-left: 0.5rem;
+}
+
+/* Grille des épisodes */
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.episode-card {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    transition: background 0.2s, transform 0.2s;
+    position: relative;
+}
+
+.episode-card:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+}
+
+.episode-thumb {
+    width: 100px;
+    height: 70px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #000;
+    flex-shrink: 0;
+}
+
+.episode-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.episode-details .ep-badge {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.episode-details .ep-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.episode-details .ep-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 1rem;
+}
+
+.episode-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.episode-card:hover .episode-actions {
+    opacity: 1;
+}
+
+.episode-actions .btn-icon-sm {
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border);
+    background: transparent;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+.btn-back:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.episode-detail-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+.episode-detail-poster {
+    width: 250px;
+    max-width: 350px;
+    max-height: 400px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.episode-detail-info h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+.episode-detail-meta {
+    display: flex;
+    gap: 1rem;
+    margin: 0.5rem 0 1rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+    .episode-detail-content {
+        flex-direction: column;
+    }
+    .episode-detail-poster {
+        width: 100%;
+        max-width: 250px;
+        margin: 0 auto;
+    }
 }
 
 /* ============================================

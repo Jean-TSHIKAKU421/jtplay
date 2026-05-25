@@ -11,13 +11,34 @@ class AuthManager {
         this.loadUsers();
     }
 
-    loadUsers() {
-        const stored = localStorage.getItem(USERS_KEY);
-        this.users = stored ? JSON.parse(stored) : [];
+    async loadUsers() {
+        try {
+            const response = await fetch('/api/users');
+            if (response.ok) {
+                const data = await response.json();
+                this.users = data.users || [];
+                localStorage.setItem(USERS_KEY, JSON.stringify(this.users));
+            } else {
+                throw new Error('API error');
+            }
+        } catch (error) {
+            console.warn('Fallback localStorage');
+            const stored = localStorage.getItem(USERS_KEY);
+            this.users = stored ? JSON.parse(stored) : [];
+        }
     }
 
-    saveUsers() {
+    async saveUsers() {
         localStorage.setItem(USERS_KEY, JSON.stringify(this.users));
+        try {
+            await fetch('/api/users', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ users: this.users })
+            });
+        } catch (error) {
+            console.error('Erreur sauvegarde utilisateurs', error);
+        }
     }
 
     findUser(email) {

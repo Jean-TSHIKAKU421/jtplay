@@ -1,67 +1,71 @@
 // ============================================
-// GESTION DES FILMS (localStorage)
+// GESTION DES FILMS (API + localStorage fallback)
 // ============================================
 
 const FILMS_KEY = 'cinevault_films';
+let currentType = 'all';
+let currentGenre = null;
+let currentSort = 'date';   // 'date', 'name', 'rating'
+let currentHeroFilmId = null;
+let heroInterval = null;
 
 class FilmManager {
     constructor() {
         this.films = [];
     }
 
+    // Initialisation : charge depuis l'API, puis fallback localStorage
     async init() {
-        // Essayer de charger depuis le localStorage
-        const stored = localStorage.getItem(FILMS_KEY);
-        if (stored) {
-            this.films = JSON.parse(stored);
-            return;
-        }
-
-        // Sinon charger depuis le fichier JSON local
         try {
-            const response = await fetch('data/films.json');
+            const response = await fetch('/api/films');
             if (response.ok) {
                 const data = await response.json();
                 this.films = data.films || [];
-                this.save();
+                this.saveLocal();
+                console.log('✅ Films chargés depuis API');
+            } else {
+                throw new Error('API error');
             }
         } catch (error) {
-            console.error('Erreur chargement films:', error);
-            this.showError('Erreur de chargement des films. Utilisation des données locales.');
-            this.films = [];
+            console.warn('⚠️ Fallback localStorage pour films');
+            this.loadLocal();
         }
     }
 
-    showError(message) {
-        let errorDiv = document.getElementById('filmsError');
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.id = 'filmsError';
-            errorDiv.style.cssText = `
-                background: #FEE2E2;
-                color: #DC2626;
-                padding: 12px 20px;
-                margin: 0 2rem 1rem 2rem;
-                border-radius: 8px;
-                font-size: 0.9rem;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            `;
-            const filmsSection = document.querySelector('.films-section');
-            if (filmsSection) {
-                filmsSection.parentNode.insertBefore(errorDiv, filmsSection);
-            }
-        }
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-        errorDiv.style.display = 'flex';
-        setTimeout(() => {
-            errorDiv.style.display = 'none';
-        }, 5000);
+    loadLocal() {
+        const stored = localStorage.getItem(FILMS_KEY);
+        this.films = stored ? JSON.parse(stored) : [];
     }
 
-    save() {
+    saveLocal() {
         localStorage.setItem(FILMS_KEY, JSON.stringify(this.films));
+    }
+
+    // Sauvegarde sur l'API et en local
+    async save() {
+        this.saveLocal();
+        try {
+            await fetch('/api/films', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ films: this.films })
+            });
+            console.log('💾 Films sauvegardés sur le serveur');
+        } catch (error) {
+            console.error('Erreur sauvegarde films sur le serveur', error);
+        }
+    }
+
+    // Remet les IDs de 1 à N après suppression
+    reindexIds() {
+        this.films.forEach((film, index) => {
+            film.id = index + 1;
+        });
+    }
+
+    // Générer un ID séquentiel (max + 1)
+    getNextId() {
+        return this.films.length + 1;
     }
 
     getAll() {
@@ -86,9 +90,10 @@ class FilmManager {
         return this.films.filter(f => f.genre === genre);
     }
 
-    add(filmData) {
+    // Ajout d'un film avec ID auto
+    async add(filmData) {
         const film = {
-            id: Date.now(),
+            id: this.getNextId(),
             ...filmData,
             rating: parseFloat(filmData.rating) || 0,
             year: parseInt(filmData.year),
@@ -97,40 +102,88 @@ class FilmManager {
                 : (filmData.cast || [])
         };
         this.films.push(film);
-        this.save();
+        await this.save();
         return film;
     }
 
-    update(id, filmData) {
+    // Mise à jour d'un film existant
+    async update(id, filmData) {
         const index = this.films.findIndex(f => f.id === id);
         if (index !== -1) {
             this.films[index] = {
                 ...this.films[index],
                 ...filmData,
-                id,
+                id: id,
                 rating: parseFloat(filmData.rating) || 0,
                 year: parseInt(filmData.year),
                 cast: typeof filmData.cast === 'string'
                     ? filmData.cast.split(',').map(s => s.trim()).filter(Boolean)
                     : (filmData.cast || this.films[index].cast)
             };
-            this.save();
+            await this.save();
         }
     }
 
-    delete(id) {
+    // Suppression d'un film
+    async delete(id) {
         this.films = this.films.filter(f => f.id !== id);
-        this.save();
+        this.reindexIds();   // On ré-indexe automatiquement
+        await this.save();
+    }
+
+    async addEpisode(serieId, episodeData) {
+        const serie = this.films.find(f => f.id === serieId);
+        if (!serie) return null;
+        if (!serie.episodes) serie.episodes = [];
+        serie.episodes.push(episodeData);
+        await this.save();
+        return episodeData;
+    }
+
+    async updateEpisode(serieId, episodeIndex, episodeData) {
+        const serie = this.films.find(f => f.id === serieId);
+        if (!serie || !serie.episodes) return null;
+        if (episodeIndex >= 0 && episodeIndex < serie.episodes.length) {
+            serie.episodes[episodeIndex] = episodeData;
+            await this.save();
+            return episodeData;
+        }
+        return null;
+    }
+
+    async deleteEpisode(serieId, episodeIndex) {
+        const serie = this.films.find(f => f.id === serieId);
+        if (!serie || !serie.episodes) return false;
+        if (episodeIndex >= 0 && episodeIndex < serie.episodes.length) {
+            serie.episodes.splice(episodeIndex, 1);
+            await this.save();
+            return true;
+        }
+        return false;
     }
 }
 
 const filmManager = new FilmManager();
 
-// Variables globales pour les filtres et le hero
-let currentType = 'all';
-let currentGenre = null;
-let currentHeroFilmId = null;
-let heroInterval = null;
+// ================ TRI ================
+function applySort(films) {
+    const sorted = [...films];
+    switch (currentSort) {
+        case 'name':
+            sorted.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
+            break;
+        case 'rating':
+            sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            break;
+        case 'date':
+        default:
+            sorted.sort((a, b) => (b.year || 0) - (a.year || 0));
+            break;
+    }
+    return sorted;
+}
+
+// ================ INTERFACE UTILISATEUR ================
 
 // Créer une carte de film
 function createFilmCard(film, index) {
@@ -164,23 +217,19 @@ function hideLoader() {
     if (loader) {
         loader.style.opacity = '0';
         loader.style.visibility = 'hidden';
-        setTimeout(() => {
-            loader.remove();
-        }, 400);
+        setTimeout(() => loader.remove(), 400);
     }
 }
 
-// Animer les cartes
+// Animer les cartes une par une
 function animateCards() {
     const cards = document.querySelectorAll('.film-card');
-    cards.forEach((card, index) => {
-        setTimeout(() => {
-            card.classList.add('visible');
-        }, index * 50);
+    cards.forEach((card, i) => {
+        setTimeout(() => card.classList.add('visible'), i * 50);
     });
 }
 
-// Filtrer les films selon le type et le genre
+// Récupère les films filtrés et triés
 function getFilteredFilms() {
     let films = filmManager.getAll();
 
@@ -194,12 +243,17 @@ function getFilteredFilms() {
         films = films.filter(f => f.genre === currentGenre);
     }
 
+    // Appliquer le tri
+    films = applySort(films);
+
     return films;
 }
 
-// Charger les films dans l'UI
+// Charge les films dans la grille
 async function loadFilmsToUI() {
     await filmManager.init();
+    // Sécurité : cacher le loader après 5 secondes max
+    setTimeout(hideLoader, 5000);
 
     const films = getFilteredFilms();
     const grid = document.getElementById('filmsGrid');
@@ -207,69 +261,52 @@ async function loadFilmsToUI() {
 
     if (grid) {
         grid.innerHTML = films.length > 0
-            ? films.map((film, i) => createFilmCard(film, i)).join('')
+            ? films.map((f, i) => createFilmCard(f, i)).join('')
             : '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Aucun film trouvé</p>';
     }
-
-    if (count) {
-        count.textContent = `${films.length} film${films.length > 1 ? 's' : ''}`;
-    }
+    if (count) count.textContent = `${films.length} film${films.length > 1 ? 's' : ''}`;
 
     hideLoader();
-    setTimeout(() => {
-        animateCards();
-    }, 100);
+    setTimeout(animateCards, 100);
 }
 
-// Recherche et affichage
+// Recherche + filtres + tri
 function searchAndDisplay(query) {
     const heroSection = document.getElementById('heroSection');
-
     if (!query.trim()) {
         if (heroSection) heroSection.classList.remove('hidden');
         loadFilmsToUI();
         return;
     }
-
     if (heroSection) heroSection.classList.add('hidden');
 
     let results = filmManager.search(query);
 
-    if (currentType === 'film') {
-        results = results.filter(f => f.type === 'film');
-    } else if (currentType === 'serie') {
-        results = results.filter(f => f.type === 'serie');
-    }
-    if (currentGenre) {
-        results = results.filter(f => f.genre === currentGenre);
-    }
+    if (currentType === 'film') results = results.filter(f => f.type === 'film');
+    else if (currentType === 'serie') results = results.filter(f => f.type === 'serie');
+    if (currentGenre) results = results.filter(f => f.genre === currentGenre);
+
+    // Appliquer le tri
+    results = applySort(results);
 
     const grid = document.getElementById('filmsGrid');
     const count = document.getElementById('filmsCount');
-
     if (grid) {
         grid.innerHTML = results.length > 0
-            ? results.map((film, i) => createFilmCard(film, i)).join('')
+            ? results.map((f, i) => createFilmCard(f, i)).join('')
             : '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 2rem;">Aucun film trouvé</p>';
         setTimeout(animateCards, 50);
     }
-
-    if (count) {
-        count.textContent = `${results.length} film${results.length > 1 ? 's' : ''}`;
-    }
+    if (count) count.textContent = `${results.length} film${results.length > 1 ? 's' : ''}`;
 }
 
-// Modal de détails
+// Modal de détails d'un film
 function openFilmModal(filmId) {
     const film = filmManager.getById(filmId);
     if (!film) return;
 
     const modal = document.getElementById('filmModal');
-    const modalBody = modal.querySelector('.modal-body');
-    const modalClose = modal.querySelector('.modal-close');
-    const modalOverlay = modal.querySelector('.modal-overlay');
-
-    modalBody.innerHTML = `
+    modal.querySelector('.modal-body').innerHTML = `
         <div style="display: flex; gap: 2rem;">
             <img src="${film.poster}" alt="${film.title}"
                  style="width: 250px; border-radius: 12px; object-fit: cover;"
@@ -288,45 +325,36 @@ function openFilmModal(filmId) {
             </div>
         </div>
     `;
-
     modal.classList.add('active');
-
-    const closeModal = () => modal.classList.remove('active');
-    modalClose.onclick = closeModal;
-    modalOverlay.onclick = closeModal;
+    modal.querySelector('.modal-close').onclick = () => modal.classList.remove('active');
+    modal.querySelector('.modal-overlay').onclick = () => modal.classList.remove('active');
 }
 
-// Scroll vers le film dans la grille
+// Faire défiler jusqu'à la carte du film
 function scrollToFilm(filmId) {
     const cards = document.querySelectorAll('.film-card');
-    let targetCard = null;
-
-    cards.forEach(card => {
-        if (card.onclick && card.onclick.toString().includes(`openFilmModal(${filmId})`)) {
-            targetCard = card;
-        }
+    let target = null;
+    cards.forEach(c => {
+        if (c.onclick && c.onclick.toString().includes(`openFilmModal(${filmId})`)) target = c;
     });
-
-    if (targetCard) {
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        targetCard.style.boxShadow = '0 0 0 4px var(--primary)';
-        targetCard.style.transform = 'scale(1.05)';
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.style.boxShadow = '0 0 0 4px var(--primary)';
+        target.style.transform = 'scale(1.05)';
         setTimeout(() => {
-            targetCard.style.boxShadow = '';
-            targetCard.style.transform = '';
+            target.style.boxShadow = '';
+            target.style.transform = '';
         }, 1500);
     }
 }
 
-// Hero aléatoire
+// ===================== HERO (rotation aléatoire) =====================
 function updateHero(film) {
     if (!film) return;
-
     currentHeroFilmId = film.id;
 
     const heroBg = document.getElementById('heroBg');
     const heroContent = document.getElementById('heroContent');
-
     heroContent.classList.remove('visible');
 
     const img = new Image();
@@ -334,29 +362,20 @@ function updateHero(film) {
     img.onload = () => {
         heroBg.style.backgroundImage = `url('${film.poster}')`;
         heroBg.classList.add('active');
-
         document.getElementById('heroTitle').textContent = film.title;
         document.getElementById('heroDescription').textContent = film.description || '';
         document.getElementById('heroRating').textContent = film.rating;
         document.getElementById('heroDuration').textContent = film.duration;
         document.getElementById('heroYear').textContent = film.year;
         document.getElementById('heroGenre').textContent = film.genre;
-
-        setTimeout(() => {
-            heroContent.classList.add('visible');
-        }, 200);
+        setTimeout(() => heroContent.classList.add('visible'), 200);
     };
-
-    if (img.complete) {
-        img.onload();
-    }
+    if (img.complete) img.onload();
 }
 
 function randomizeHero() {
     const films = filmManager.getAll();
-    if (films.length === 0) return;
-    const randomFilm = films[Math.floor(Math.random() * films.length)];
-    updateHero(randomFilm);
+    if (films.length > 0) updateHero(films[Math.floor(Math.random() * films.length)]);
 }
 
 function startHeroRotation(intervalMs = 8000) {
@@ -371,74 +390,91 @@ function stopHeroRotation() {
     }
 }
 
-// Initialisation
+// ===================== INITIALISATION =====================
 document.addEventListener('DOMContentLoaded', async () => {
-    if (window.location.pathname.includes('home.html')) {
-        if (!isLoggedIn()) {
-            window.location.href = 'index.html';
-            return;
-        }
-
-        const user = getCurrentUser();
-        if (user && document.getElementById('userName')) {
-            document.getElementById('userName').textContent = user.name;
-        }
-
-        // Charger les films
-        await loadFilmsToUI();
-
-        // Initialiser le hero
-        randomizeHero();
-        startHeroRotation(8000);
-
-        // Recherche
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                searchAndDisplay(e.target.value);
-            });
-        }
-
-        // Catégories principales
-        document.querySelectorAll('#mainCategories .category-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                document.querySelectorAll('#mainCategories .category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                currentType = btn.dataset.type;
-                currentGenre = null;
-
-                const subSection = document.getElementById('subCategoriesSection');
-                if (currentType === 'all') {
-                    subSection.style.display = 'none';
-                } else {
-                    subSection.style.display = 'block';
-                    document.querySelectorAll('#subCategories .category-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelector('#subCategories .category-btn[data-genre="all"]').classList.add('active');
-                }
-
-                document.getElementById('searchInput').value = '';
-                const heroSection = document.getElementById('heroSection');
-                if (heroSection) heroSection.classList.remove('hidden');
-
-                await loadFilmsToUI();
-            });
-        });
-
-        // Sous-catégories
-        document.querySelectorAll('#subCategories .category-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                document.querySelectorAll('#subCategories .category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                currentGenre = btn.dataset.genre === 'all' ? null : btn.dataset.genre;
-
-                document.getElementById('searchInput').value = '';
-                const heroSection = document.getElementById('heroSection');
-                if (heroSection) heroSection.classList.remove('hidden');
-
-                await loadFilmsToUI();
-            });
-        });
+    // Vérifier qu'on est sur home.html
+    if (!window.location.pathname.includes('home.html')) return;
+    if (!isLoggedIn()) {
+        window.location.href = 'index.html';
+        return;
     }
+
+    const user = getCurrentUser();
+    if (user) document.getElementById('userName').textContent = user.name;
+
+    // Charger les films et afficher
+    await loadFilmsToUI();
+
+    // Hero aléatoire
+    randomizeHero();
+    startHeroRotation(8000);
+
+    // Recherche
+    document.getElementById('searchInput').addEventListener('input', e => searchAndDisplay(e.target.value));
+
+    // Catégories principales
+    document.querySelectorAll('#mainCategories .category-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            document.querySelectorAll('#mainCategories .category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentType = btn.dataset.type;
+            currentGenre = null;
+            const sub = document.getElementById('subCategoriesSection');
+            if (currentType === 'all') sub.style.display = 'none';
+            else {
+                sub.style.display = 'block';
+                document.querySelectorAll('#subCategories .category-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('#subCategories .category-btn[data-genre="all"]').classList.add('active');
+            }
+            document.getElementById('searchInput').value = '';
+            document.getElementById('heroSection').classList.remove('hidden');
+            await loadFilmsToUI();
+        });
+    });
+
+    // Sous-catégories (genres)
+    document.querySelectorAll('#subCategories .category-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            document.querySelectorAll('#subCategories .category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentGenre = btn.dataset.genre === 'all' ? null : btn.dataset.genre;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('heroSection').classList.remove('hidden');
+            await loadFilmsToUI();
+        });
+    });
+
+    // Bouton Trie
+    const sortBtn = document.getElementById('sortBtn');
+    const sortDropdown = document.getElementById('sortDropdown');
+    const sortOptions = document.querySelectorAll('.sort-option');
+
+    sortBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sortDropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+        sortDropdown.classList.remove('show');
+    });
+
+    sortDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    sortOptions.forEach(option => {
+        option.addEventListener('click', async () => {
+            sortOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+            currentSort = option.dataset.sort;
+            sortDropdown.classList.remove('show');
+
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && searchInput.value.trim()) {
+                searchAndDisplay(searchInput.value);
+            } else {
+                await loadFilmsToUI();
+            }
+        });
+    });
 });
