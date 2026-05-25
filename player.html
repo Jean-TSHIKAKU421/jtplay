@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JTPlay - Lecture</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -30,6 +30,24 @@
             --player-details-bg: #fff;
             --player-meta: #666;
             --player-description: #444;
+        }
+
+        .video-container:-webkit-full-screen,
+        .video-container:-moz-full-screen,
+        .video-container:-ms-fullscreen,
+        .video-container:fullscreen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        .video-container:-webkit-full-screen video,
+        .video-container:-moz-full-screen video,
+        .video-container:-ms-fullscreen video,
+        .video-container:fullscreen video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
         
         .player-page {
@@ -347,24 +365,36 @@
             position: fixed;
             inset: 0;
             z-index: 9999;
+            background-color: #000;
         }
         
         .player-page.fullscreen .player-header,
         .player-page.fullscreen .film-details,
         .player-page.fullscreen .episodes-section {
-            display: none;
+            display: none !important;
         }
         
         .player-page.fullscreen .video-container {
             position: fixed;
             inset: 0;
+            background: #000;
         }
         
         .player-page.fullscreen .video-controls {
-            bottom: 30px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .player-page.fullscreen .video-container:hover .video-controls,
+        .player-page.fullscreen .video-container:active .video-controls {
+            opacity: 1;
         }
 
         @media (max-width: 768px) {
+            .player-page.fullscreen .video-controls {
+                opacity: 1;
+            }
+
             .player-header {
                 padding: 0.75rem 1rem;
             }
@@ -477,42 +507,45 @@
 
     <script src="js/auth.js"></script>
     <script>
+        // ============================================
+        // PLAYER JS - CinéVault / JTPlay
+        // ============================================
+
         if (!isLoggedIn()) {
             window.location.href = 'index.html';
         }
-        
+
         const urlParams = new URLSearchParams(window.location.search);
         const filmId = urlParams.get('id');
-        
+
         if (!filmId) {
             window.location.href = 'home.html';
         }
-        
-        // Éléments vidéo et contrôles
+
+        // Éléments du DOM
         const video = document.getElementById('videoPlayer');
         const playPauseBtn = document.getElementById('playPauseBtn');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const rewindBtn = document.getElementById('rewindBtn');
         const forwardBtn = document.getElementById('forwardBtn');
         const playerPage = document.getElementById('playerPage');
-        
-        // Éléments de progression
+        const videoContainer = document.getElementById('videoContainer');
+
         const progressBarContainer = document.getElementById('progressBarContainer');
         const progressBarFill = document.getElementById('progressBarFill');
         const currentTimeDisplay = document.getElementById('currentTime');
         const totalTimeDisplay = document.getElementById('totalTime');
-        
-        let isFullscreen = false;
-        let currentFilm = null;       // Stocke les données du film/série
-        let currentEpisode = null;    // Épisode en cours (si série)
-        
-        // Initialiser le thème
+
+        let currentFilm = null;
+        let currentEpisode = null;
+
+        // ========== THÈME ==========
         function initPlayerTheme() {
             const savedTheme = localStorage.getItem('cinevault_theme') || 'dark';
             document.body.setAttribute('data-theme', savedTheme);
             updatePlayerThemeIcon(savedTheme);
         }
-        
+
         function togglePlayerTheme() {
             const current = document.body.getAttribute('data-theme');
             const next = current === 'dark' ? 'light' : 'dark';
@@ -520,25 +553,25 @@
             localStorage.setItem('cinevault_theme', next);
             updatePlayerThemeIcon(next);
         }
-        
+
         function updatePlayerThemeIcon(theme) {
             const icon = document.getElementById('themeIcon');
             if (icon) {
                 icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             }
         }
-        
+
         initPlayerTheme();
-        
-        // Formater le temps
+
+        // ========== FORMATAGE TEMPS ==========
         function formatTime(seconds) {
             if (isNaN(seconds)) return '00:00';
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
-        
-        // Barre de progression
+
+        // ========== BARRE DE PROGRESSION ==========
         video.addEventListener('timeupdate', () => {
             if (video.duration) {
                 const progress = (video.currentTime / video.duration) * 100;
@@ -546,24 +579,24 @@
                 currentTimeDisplay.textContent = formatTime(video.currentTime);
             }
         });
-        
+
         video.addEventListener('loadedmetadata', () => {
             totalTimeDisplay.textContent = formatTime(video.duration);
         });
-        
+
         progressBarContainer.addEventListener('click', (e) => {
             const rect = progressBarContainer.getBoundingClientRect();
             const ratio = (e.clientX - rect.left) / rect.width;
             video.currentTime = ratio * video.duration;
         });
-        
+
         let isDragging = false;
         progressBarContainer.addEventListener('mousedown', (e) => {
             isDragging = true;
             const rect = progressBarContainer.getBoundingClientRect();
             video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
         });
-        
+
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
                 const rect = progressBarContainer.getBoundingClientRect();
@@ -571,15 +604,15 @@
                 video.currentTime = (x / rect.width) * video.duration;
             }
         });
-        
+
         document.addEventListener('mouseup', () => { isDragging = false; });
-        
+
         progressBarContainer.addEventListener('touchstart', (e) => {
             isDragging = true;
             const rect = progressBarContainer.getBoundingClientRect();
             video.currentTime = ((e.touches[0].clientX - rect.left) / rect.width) * video.duration;
         });
-        
+
         document.addEventListener('touchmove', (e) => {
             if (isDragging) {
                 const rect = progressBarContainer.getBoundingClientRect();
@@ -587,10 +620,10 @@
                 video.currentTime = (x / rect.width) * video.duration;
             }
         });
-        
+
         document.addEventListener('touchend', () => { isDragging = false; });
-        
-        // Contrôles
+
+        // ========== CONTRÔLES ==========
         playPauseBtn.addEventListener('click', () => {
             if (video.paused) {
                 video.play();
@@ -602,53 +635,102 @@
                 playPauseBtn.title = 'Play';
             }
         });
-        
+
         video.addEventListener('ended', () => {
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             playPauseBtn.title = 'Play';
         });
-        
-        video.addEventListener('click', () => {
-            if (video.paused) {
-                video.play();
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                playPauseBtn.title = 'Pause';
-            } else {
-                video.pause();
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                playPauseBtn.title = 'Play';
-            }
-        });
-        
+
+        // video.addEventListener('click', () => {
+        //     if (video.paused) {
+        //         video.play();
+        //         playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        //     } else {
+        //         video.pause();
+        //         playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        //     }
+        // });
+
         rewindBtn.addEventListener('click', () => {
             video.currentTime = Math.max(0, video.currentTime - 10);
         });
-        
+
         forwardBtn.addEventListener('click', () => {
             video.currentTime = Math.min(video.duration, video.currentTime + 10);
         });
-        
-        fullscreenBtn.addEventListener('click', () => {
-            if (!isFullscreen) {
-                playerPage.classList.add('fullscreen');
+
+        // ========== PLEIN ÉCRAN NATIF + ORIENTATION FORCÉE ==========
+        function enterFullscreen() {
+            const promise = videoContainer.requestFullscreen
+                ? videoContainer.requestFullscreen()
+                : (videoContainer.webkitRequestFullscreen
+                    ? videoContainer.webkitRequestFullscreen()
+                    : videoContainer.msRequestFullscreen()
+                );
+
+            promise.then(() => {
+                // L'événement fullscreenchange va verrouiller l'orientation, pas la peine de l'appeler ici.
+            }).catch(err => {
+                console.warn('Erreur passage plein écran:', err);
+            });
+        }
+
+        function exitFullscreen() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else if (document.webkitFullscreenElement) {
+                document.webkitExitFullscreen();
+            } else if (document.msFullscreenElement) {
+                document.msExitFullscreen();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                exitFullscreen();
+            } else {
+                enterFullscreen();
+            }
+        }
+
+        // Verrouiller l'orientation en paysage dès que l'état plein écran change
+        function handleFullscreenChange() {
+            const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+            updateFullscreenIcon();
+            if (isFull) {
+                // Verrouiller en paysage
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(err => {
+                        console.log('Verrouillage orientation impossible :', err);
+                    });
+                }
+            } else {
+                // Déverrouiller l'orientation
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            }
+        }
+
+        function updateFullscreenIcon() {
+            const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+            if (isFull) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
                 fullscreenBtn.title = 'Redimensionner';
-                isFullscreen = true;
             } else {
-                playerPage.classList.remove('fullscreen');
                 fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
                 fullscreenBtn.title = 'Plein écran';
-                isFullscreen = false;
             }
-        });
-        
+        }
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // ========== RACCOURCIS CLAVIER ==========
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && isFullscreen) {
-                playerPage.classList.remove('fullscreen');
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-                fullscreenBtn.title = 'Plein écran';
-                isFullscreen = false;
-            }
             if (e.key === ' ' && document.activeElement === document.body) {
                 e.preventDefault();
                 if (video.paused) {
@@ -668,54 +750,12 @@
                 video.currentTime = Math.min(video.duration, video.currentTime + 10);
             }
         });
-        
-        // Changer d'épisode
-        function loadEpisode(episode) {
-            currentEpisode = episode;
-            video.src = episode.video;
-            video.play();
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            document.getElementById('playerTitle').textContent = `${currentFilm.title} - ${episode.title}`;
-            document.title = `CinéVault - ${episode.title}`;
-            
-            // Mettre à jour l'affichage des détails de l'épisode
-            document.getElementById('filmDetails').innerHTML = `
-                <h2>${episode.title}</h2>
-                <div class="meta">
-                    <span>Saison ${episode.season}, Épisode ${episode.episodeNumber}</span>
-                    <span>${episode.duration}</span>
-                </div>
-                <p class="description">${episode.description || ''}</p>
-            `;
-            
-            // Mettre en évidence l'épisode actif dans la liste
-            document.querySelectorAll('.episode-card').forEach(card => card.classList.remove('active'));
-            const activeCard = document.querySelector(`.episode-card[data-episode-id="${episode.episodeNumber}"]`);
-            if (activeCard) activeCard.classList.add('active');
-        }
-        
-        // Construire la liste des épisodes
-        function buildEpisodesList(episodes) {
-            const grid = document.getElementById('episodesGrid');
-            grid.innerHTML = episodes.map(ep => `
-                <div class="episode-card" data-episode-id="${ep.episodeNumber}" onclick="loadEpisode(${JSON.stringify(ep).replace(/"/g, '&quot;')})">
-                    <img src="${ep.poster}" class="episode-thumb" onerror="this.src='https://via.placeholder.com/120x68?text=No+Image'">
-                    <div class="episode-info">
-                        <div class="ep-number">S${ep.season} E${ep.episodeNumber}</div>
-                        <div class="ep-title">${ep.title}</div>
-                        <div class="ep-duration">${ep.duration}</div>
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('episodesSection').style.display = 'block';
-        }
-        
-        // Chargement initial
+
+        // ========== CHARGEMENT DES DONNÉES DU FILM/SÉRIE ==========
         async function loadPlayer() {
             const FILMS_KEY = 'cinevault_films';
             let films = [];
-            
+
             const stored = localStorage.getItem(FILMS_KEY);
             if (stored) {
                 films = JSON.parse(stored);
@@ -725,30 +765,27 @@
                     const data = await response.json();
                     films = data.films || [];
                 } catch (error) {
-                    console.error('Erreur:', error);
+                    console.error('Erreur chargement films:', error);
                 }
             }
-            
+
             const film = films.find(f => f.id === parseInt(filmId));
             if (!film) {
                 window.location.href = 'home.html';
                 return;
             }
-            
             currentFilm = film;
-            
-            // Si c'est une série avec des épisodes
+
+            // Si c'est une série, on charge le premier épisode par défaut
             if (film.type === 'serie' && film.episodes && film.episodes.length > 0) {
                 buildEpisodesList(film.episodes);
-                // Charger le premier épisode
                 loadEpisode(film.episodes[0]);
             } else {
-                // Film unique
+                // Film normal
                 document.getElementById('episodesSection').style.display = 'none';
                 video.src = film.video || '';
                 document.getElementById('playerTitle').textContent = film.title;
-                document.title = `CinéVault - ${film.title}`;
-                
+                document.title = `JTPlay - ${film.title}`;
                 document.getElementById('filmDetails').innerHTML = `
                     <h2>${film.title}</h2>
                     <div class="meta">
@@ -762,7 +799,52 @@
                 `;
             }
         }
-        
+
+        // ========== GESTION DES ÉPISODES ==========
+        function loadEpisode(episode) {
+            currentEpisode = episode;
+            video.src = episode.video;
+            video.play();
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            document.getElementById('playerTitle').textContent = `${currentFilm.title} - ${episode.title}`;
+            document.title = `JTPlay - ${episode.title}`;
+            document.getElementById('filmDetails').innerHTML = `
+                <h2>${episode.title}</h2>
+                <div class="meta">
+                    <span>Saison ${episode.season}, Épisode ${episode.episodeNumber}</span>
+                    <span>${episode.duration}</span>
+                </div>
+                <p class="description">${episode.description || ''}</p>
+            `;
+
+            // Mettre en évidence l'épisode actif
+            document.querySelectorAll('.episode-card').forEach(card => card.classList.remove('active'));
+            const activeCard = document.querySelector(`.episode-card[data-episode-index="${getEpisodeIndex(episode)}"]`);
+            if (activeCard) activeCard.classList.add('active');
+        }
+
+        function getEpisodeIndex(episode) {
+            if (!currentFilm || !currentFilm.episodes) return -1;
+            return currentFilm.episodes.findIndex(ep => ep.episodeNumber === episode.episodeNumber && ep.season === episode.season);
+        }
+
+        function buildEpisodesList(episodes) {
+            const grid = document.getElementById('episodesGrid');
+            grid.innerHTML = episodes.map((ep, index) => `
+                <div class="episode-card" data-episode-index="${index}" onclick="loadEpisode(currentFilm.episodes[${index}])">
+                    <img src="${ep.poster || 'https://via.placeholder.com/120x68?text=No+Image'}" class="episode-thumb" onerror="this.src='https://via.placeholder.com/120x68'">
+                    <div class="episode-info">
+                        <div class="ep-number">S${ep.season} E${ep.episodeNumber}</div>
+                        <div class="ep-title">${ep.title}</div>
+                        <div class="ep-duration">${ep.duration}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('episodesSection').style.display = 'block';
+        }
+
+        // Initialiser le player
         loadPlayer();
     </script>
 </body>

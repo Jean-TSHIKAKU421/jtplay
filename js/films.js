@@ -2,6 +2,60 @@
 // GESTION DES FILMS (API + localStorage fallback)
 // ============================================
 
+// Gestion du scroll
+const header = document.querySelector('.header');
+const searchBarMobile = document.getElementById('searchBarMobile');
+const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+let lastScrollY = window.scrollY;
+
+function onScroll() {
+    const currentScrollY = window.scrollY;
+
+    // Bouton retour en haut
+    if (currentScrollY > 300) {
+        scrollToTopBtn.classList.add('visible');
+    } else {
+        scrollToTopBtn.classList.remove('visible');
+    }
+
+    // Sur mobile : masquer le header et afficher la barre de recherche mobile
+    if (window.innerWidth <= 768) {
+        if (currentScrollY > 100) {
+            // On cache le header
+            header.classList.add('hide-header');
+            // On affiche la barre de recherche mobile
+            searchBarMobile.classList.add('visible');
+        } else {
+            // On est tout en haut : on réaffiche le header et on cache la barre mobile
+            header.classList.remove('hide-header');
+            searchBarMobile.classList.remove('visible');
+        }
+    }
+
+    lastScrollY = currentScrollY;
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+
+// Synchroniser les deux champs de recherche
+const mainSearch = document.getElementById('searchInput');
+const mobileSearch = document.getElementById('searchInputMobile');
+if (mainSearch && mobileSearch) {
+    mainSearch.addEventListener('input', (e) => {
+        mobileSearch.value = e.target.value;
+        searchAndDisplay(e.target.value);
+    });
+    mobileSearch.addEventListener('input', (e) => {
+        mainSearch.value = e.target.value;
+        searchAndDisplay(e.target.value);
+    });
+}
+
+// Bouton retour en haut
+scrollToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
 const FILMS_KEY = 'cinevault_films';
 let currentType = 'all';
 let currentGenre = null;

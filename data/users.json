@@ -39,6 +39,22 @@
       "password": "jacques1234",
       "createdAt": "2026-05-25T12:02:19.026Z",
       "isAdmin": false
+    },
+    {
+      "id": "1779719269577",
+      "name": "Simplice TSHIBWILA",
+      "email": "simplice@gmail.com",
+      "password": "simplice1234",
+      "createdAt": "2026-05-25T14:27:49.577Z",
+      "isAdmin": false
+    },
+    {
+      "id": "1779735269744",
+      "name": "Aaron MUKUMA",
+      "email": "aaronmukuma@gmail.com",
+      "password": "aaron@1234",
+      "createdAt": "2026-05-25T18:54:29.744Z",
+      "isAdmin": false
     }
   ]
 }

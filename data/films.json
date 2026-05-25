@@ -268,12 +268,12 @@
     {
       "id": 9,
       "title": "King Kong",
-      "type": "film",
+      "type": "serie",
       "genre": "Science-Fiction",
       "year": 2005,
       "duration": "1h30",
       "rating": 6.9,
-      "poster": "sources/king_kong3.jpg",
+      "poster": "sources/king_kong1.jpg",
       "director": "Peter Jackson",
       "description": "C'est un film qui raconte l'histoire d'un héro Gorille, mais qui est discriminé par les humains ...",
       "cast": [
@@ -285,7 +285,27 @@
         "Edgar Wallace",
         "etc."
       ],
-      "video": "sources/video.mp4"
+      "video": "sources/video.mp4",
+      "episodes": [
+        {
+          "episodeNumber": 1,
+          "season": 1,
+          "title": "King Kong - Épisode 1",
+          "duration": "1h30",
+          "poster": "sources/king_kong1.jpg",
+          "video": "sources/video.mp4",
+          "description": "C'est un film qui raconte l'histoire d'un héro Gorille, mais qui est discriminé par les humains ..."
+        },
+        {
+          "episodeNumber": 2,
+          "season": 1,
+          "title": "King Kong - Episode 2",
+          "duration": "41 min",
+          "poster": "sources/king_kong2.jpg",
+          "video": "sources/video.mp4",
+          "description": "Le geant héro est en colère..."
+        }
+      ]
     },
     {
       "id": 10,
