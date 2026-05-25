@@ -1,3 +1,36 @@
 {
-  "users": []
+  "users": [
+    {
+      "id": "1779645260075",
+      "name": "Jean TSHIKAKU",
+      "email": "jtshikaku@gmail.com",
+      "password": "JTT1234",
+      "createdAt": "2026-05-24T17:54:20.075Z",
+      "isAdmin": false
+    },
+    {
+      "id": "1779667252316",
+      "name": "Mariette KALOND",
+      "email": "mariettekalond@gmail.com",
+      "password": "mariette123",
+      "createdAt": "2026-05-25T00:00:52.316Z",
+      "isAdmin": false
+    },
+    {
+      "id": "1779687262336",
+      "name": "Victoria MUJINGA",
+      "email": "victoriamujinga@gmail.com",
+      "password": "victoria123",
+      "createdAt": "2026-05-25T00:00:52.316Z",
+      "isAdmin": false
+    },
+    {
+      "id": "1719647752386",
+      "name": "Paul NSENGA",
+      "email": "paulnsenga@gmail.com",
+      "password": "paul123",
+      "createdAt": "2026-05-25T00:00:52.316Z",
+      "isAdmin": false
+    }
+  ]
 }

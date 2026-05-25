@@ -12,7 +12,11 @@
       "duration": "2h46",
       "description": "Paul Atreides s'unit aux Fremen pour libérer Arrakis des griffes des Harkonnen.",
       "director": "Denis Villeneuve",
-      "cast": ["Timothée Chalamet", "Zendaya", "Rebecca Ferguson"]
+      "cast": [
+        "Timothée Chalamet",
+        "Zendaya",
+        "Rebecca Ferguson"
+      ]
     },
     {
       "id": 2,
@@ -26,7 +30,11 @@
       "duration": "3h00",
       "description": "L'histoire du scientifique J. Robert Oppenheimer et son rôle dans le développement de la bombe atomique.",
       "director": "Christopher Nolan",
-      "cast": ["Cillian Murphy", "Emily Blunt", "Matt Damon"]
+      "cast": [
+        "Cillian Murphy",
+        "Emily Blunt",
+        "Matt Damon"
+      ]
     },
     {
       "id": 3,
@@ -40,7 +48,11 @@
       "duration": "2h56",
       "description": "Batman traque un tueur en série qui s'en prend à l'élite de Gotham.",
       "director": "Matt Reeves",
-      "cast": ["Robert Pattinson", "Zoë Kravitz", "Paul Dano"]
+      "cast": [
+        "Robert Pattinson",
+        "Zoë Kravitz",
+        "Paul Dano"
+      ]
     },
     {
       "id": 4,
@@ -54,7 +66,11 @@
       "duration": "2h28",
       "description": "Un voleur expérimenté dans l'art de l'extraction de rêves se voit offrir une chance de rédemption.",
       "director": "Christopher Nolan",
-      "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"]
+      "cast": [
+        "Leonardo DiCaprio",
+        "Joseph Gordon-Levitt",
+        "Elliot Page"
+      ]
     },
     {
       "id": 5,
@@ -68,7 +84,11 @@
       "duration": "2h49",
       "description": "Un groupe d'explorateurs voyage à travers un trou de ver pour sauver l'humanité.",
       "director": "Christopher Nolan",
-      "cast": ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"]
+      "cast": [
+        "Matthew McConaughey",
+        "Anne Hathaway",
+        "Jessica Chastain"
+      ]
     },
     {
       "id": 6,
@@ -82,7 +102,11 @@
       "duration": "2h12",
       "description": "Une famille pauvre s'infiltre dans une riche maison en se faisant passer pour des employés qualifiés.",
       "director": "Bong Joon-ho",
-      "cast": ["Song Kang-ho", "Lee Sun-kyun", "Cho Yeo-jeong"]
+      "cast": [
+        "Song Kang-ho",
+        "Lee Sun-kyun",
+        "Cho Yeo-jeong"
+      ]
     },
     {
       "id": 7,
@@ -96,7 +120,11 @@
       "duration": "2h02",
       "description": "Arthur Fleck, un comédien raté, bascule dans la folie et devient le Joker.",
       "director": "Todd Phillips",
-      "cast": ["Joaquin Phoenix", "Robert De Niro", "Zazie Beetz"]
+      "cast": [
+        "Joaquin Phoenix",
+        "Robert De Niro",
+        "Zazie Beetz"
+      ]
     },
     {
       "id": 8,
@@ -109,7 +137,11 @@
       "duration": "4 saisons",
       "description": "Quand un jeune garçon disparaît, une petite ville découvre un mystère qui implique des expériences secrètes, des forces surnaturelles et une étrange petite fille.",
       "director": "The Duffer Brothers",
-      "cast": ["Winona Ryder", "David Harbour", "Millie Bobby Brown"],
+      "cast": [
+        "Winona Ryder",
+        "David Harbour",
+        "Millie Bobby Brown"
+      ],
       "episodes": [
         {
           "episodeNumber": 1,
@@ -156,7 +188,6 @@
           "video": "sources/video.mp4",
           "description": "Joyce cherche à entrer en contact avec Will."
         },
-        
         {
           "episodeNumber": 6,
           "season": 1,
@@ -165,6 +196,61 @@
           "poster": "sources/stranger_things_s1_e6.jpg",
           "video": "sources/video.mp4",
           "description": "Joyce cherche à entrer en contact avec Will."
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "The last of us",
+      "type": "serie",
+      "genre": "Horreur",
+      "year": 2023,
+      "rating": 4.8,
+      "poster": "sources/the_last_of_us2.jpg",
+      "director": "JTT",
+      "description": "C'est un très bon film",
+      "cast": [
+        "Joel",
+        "Marthe",
+        "Victoria",
+        "..."
+      ],
+      "episodes": [
+        {
+          "episodeNumber": 1,
+          "season": 1,
+          "title": "The last of us - Épisode 1",
+          "duration": "45min",
+          "poster": "sources/the_last_of_us.jpg",
+          "video": "videos/video.mp4",
+          "description": "C'est un très bon film"
+        },
+        {
+          "episodeNumber": 2,
+          "season": 1,
+          "title": "The last of us - Épisode 2",
+          "duration": "48min",
+          "poster": "sources/the_last_of_us2.jpg",
+          "video": "videos/video.mp4",
+          "description": "Joel fait sa rencontre avec Elie"
+        },
+        {
+          "episodeNumber": 3,
+          "season": 1,
+          "title": "The last of us - Épisode 3",
+          "duration": "45min",
+          "poster": "sources/the_last_of_us3.jpg",
+          "video": "videos/video.mp4",
+          "description": "Joel et Elie font face à des infectés"
+        },
+        {
+          "episodeNumber": 4,
+          "season": 1,
+          "title": "The last of us - Épisode 4",
+          "duration": "45min",
+          "poster": "sources/the_last_of_us.jpg",
+          "video": "videos/video.mp4",
+          "description": "Joel et Elie font face à des bandits"
         }
       ]
     }

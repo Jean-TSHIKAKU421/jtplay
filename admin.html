@@ -3,12 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JTPlay - Administration</title>
+    <title>CinéVault - Administration</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Styles spécifiques à l'admin */
+        .admin-page {
+            display: flex;
+            min-height: calc(100vh - 70px);
+            background: var(--bg-primary);
+        }
+        
+        .admin-sidebar {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .admin-sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+        
+        .admin-sidebar-header h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        
+        .admin-sidebar-header .admin-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .sidebar-btn {
+            width: 100%;
+            padding: 0.85rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            position: relative;
+            text-align: left;
+        }
+        
+        .sidebar-btn i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        
+        .sidebar-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .sidebar-btn.active {
+            background: rgba(229, 9, 20, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sidebar-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+        }
+        
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+            animation: fadeSlideIn 0.3s ease;
+        }
+        
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .section-top h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .btn-add {
+            padding: 0.7rem 1.4rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s, transform 0.2s;
+        }
+        
+        .btn-add:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        /* Tableaux */
+        .admin-table-wrapper {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th {
+            text-align: left;
+            padding: 1rem 1.25rem;
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .admin-table td {
+            padding: 0.9rem 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .admin-table tr:hover td {
+            background: var(--bg-hover);
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon-sm {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-icon-sm:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .stat-box {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.8rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.2s;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        
+        .stat-icon.films {
+            background: rgba(229, 9, 20, 0.1);
+            color: var(--primary);
+        }
+        
+        .stat-icon.users {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+        
+        .stat-icon.downloads {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-page {
+                flex-direction: column;
+            }
+            
+            .admin-sidebar {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 0.75rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            
+            .admin-sidebar-header {
+                display: none;
+            }
+            
+            .sidebar-btn {
+                white-space: nowrap;
+                width: auto;
+                padding: 0.6rem 1rem;
+                border-radius: 8px;
+                font-size: 0.85rem;
+            }
+            
+            .sidebar-btn.active::before {
+                display: none;
+            }
+            
+            .admin-content {
+                padding: 1.5rem 1rem;
+            }
+            
+            .section-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body>
+<body data-theme="dark">
     
     <header class="header admin-header">
         <div class="header-container">
@@ -27,74 +337,135 @@
         </div>
     </header>
 
-    <main class="main-content">
-        <div class="admin-page">
-            <div class="admin-sidebar">
+    <div class="admin-page">
+        <!-- Sidebar -->
+        <div class="admin-sidebar">
+            <div class="admin-sidebar-header">
                 <h3>Gestion</h3>
-                <button class="sidebar-btn active" data-section="films">
-                    <i class="fas fa-film"></i> Films
-                </button>
-                <button class="sidebar-btn" data-section="users">
-                    <i class="fas fa-users"></i> Utilisateurs
-                </button>
-                <button class="sidebar-btn" data-section="stats">
-                    <i class="fas fa-chart-bar"></i> Statistiques
-                </button>
+                <div class="admin-name" id="adminNameDisplay">Administrateur</div>
+            </div>
+            <button class="sidebar-btn active" data-section="films">
+                <i class="fas fa-film"></i> Films
+            </button>
+            <button class="sidebar-btn" data-section="users">
+                <i class="fas fa-users"></i> Utilisateurs
+            </button>
+            <button class="sidebar-btn" data-section="stats">
+                <i class="fas fa-chart-bar"></i> Statistiques
+            </button>
+        </div>
+
+        <!-- Contenu -->
+        <div class="admin-content" id="adminContent">
+            <!-- Section Films -->
+            <div class="admin-section active" id="filmsSection">
+                <div class="section-top">
+                    <h2>🎥 Gestion des films</h2>
+                    <button class="btn-add" onclick="showAddFilmForm()">
+                        <i class="fas fa-plus"></i> Ajouter un film
+                    </button>
+                    <button class="btn-export" onclick="exportFilmsJSON()">
+                        <i class="fas fa-download"></i> Exporter films.json
+                    </button>
+                    <input type="file" id="importFilmsFile" accept=".json" style="display:none" onchange="importFilmsJSON(event)">
+                </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table" id="filmsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Poster</th>
+                                <th>Titre</th>
+                                <th>Type</th>
+                                <th>Genre</th>
+                                <th>Année</th>
+                                <th>Note</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filmsTableBody">
+                            <!-- Rempli dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="admin-content" id="adminContent">
-                <!-- Section Films -->
-                <div class="admin-section active" id="filmsSection">
-                    <div class="section-top">
-                        <h2>Gestion des films</h2>
-                        <button class="btn-add" onclick="showAddFilmForm()">
-                            <i class="fas fa-plus"></i> Ajouter un film
-                        </button>
-                    </div>
-                    <div class="films-table" id="filmsTable">
-                        <!-- Chargé dynamiquement -->
-                    </div>
+            <!-- Section Utilisateurs -->
+            <div class="admin-section" id="usersSection">
+                <div class="section-top">
+                    <h2>👥 Utilisateurs inscrits</h2>
                 </div>
-
-                <!-- Section Utilisateurs -->
-                <div class="admin-section" id="usersSection">
-                    <h2>Utilisateurs inscrits</h2>
-                    <div class="users-table" id="usersTable">
-                        <!-- Chargé dynamiquement -->
-                    </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Date d'inscription</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Rempli dynamiquement -->
+                        </tbody>
+                    </table>
                 </div>
+                <div style="margin-top: 1.5rem; text-align: right;">
+                <div class="sauvegarde">
+                    <button class="btn-add" onclick="exportUsersJSON()">
+                        <i class="fas fa-download"></i> Exporter les utilisateurs (JSON)
+                    </button>
+                    <button class="btn-add" onclick="document.getElementById('importUsersFile').click()">
+                        <i class="fas fa-upload"></i> Importer utilisateurs.json
+                    </button>
+                    <input type="file" id="importUsersFile" accept=".json" style="display:none" onchange="importUsersJSON(event)">
+                </div>
+            </div>
+            </div>
 
-                <!-- Section Statistiques -->
-                <div class="admin-section" id="statsSection">
-                    <h2>Statistiques</h2>
-                    <div class="stats-grid">
-                        <div class="stat-box">
+            <!-- Section Statistiques -->
+            <div class="admin-section" id="statsSection">
+                <div class="section-top">
+                    <h2>📊 Statistiques</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-icon films">
                             <i class="fas fa-film"></i>
-                            <span class="stat-value" id="totalFilms">0</span>
-                            <span class="stat-label">Films</span>
                         </div>
-                        <div class="stat-box">
+                        <div>
+                            <div class="stat-value" id="totalFilmsStat">0</div>
+                            <div class="stat-label">Films / Séries</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon users">
                             <i class="fas fa-users"></i>
-                            <span class="stat-value" id="totalUsers">0</span>
-                            <span class="stat-label">Utilisateurs</span>
                         </div>
-                        <div class="stat-box">
+                        <div>
+                            <div class="stat-value" id="totalUsersStat">0</div>
+                            <div class="stat-label">Utilisateurs</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon downloads">
                             <i class="fas fa-download"></i>
-                            <span class="stat-value" id="totalDownloads">0</span>
-                            <span class="stat-label">Téléchargements</span>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="totalDownloadsStat">0</div>
+                            <div class="stat-label">Téléchargements</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- Modal Ajout/Modification Film -->
     <div class="modal" id="adminModal">
         <div class="modal-overlay" onclick="closeAdminModal()"></div>
         <div class="modal-content admin-modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Ajouter un film</h3>
+                <h3 id="modalTitle">Ajouter un film / série</h3>
                 <button class="modal-close" onclick="closeAdminModal()">&times;</button>
             </div>
             <form id="filmForm" onsubmit="handleFilmSubmit(event)">
@@ -104,6 +475,15 @@
                         <label>Titre *</label>
                         <input type="text" id="filmTitle" required>
                     </div>
+                    <div class="form-group">
+                        <label>Type *</label>
+                        <select id="filmType" required onchange="toggleVideoField()">
+                            <option value="film">Film</option>
+                            <option value="serie">Série</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
                         <label>Genre *</label>
                         <select id="filmGenre" required>
@@ -117,24 +497,43 @@
                             <option>Horreur</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
                         <label>Année *</label>
                         <input type="number" id="filmYear" min="1900" max="2030" required>
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
                         <label>Durée *</label>
-                        <input type="text" id="filmDuration" placeholder="2h30" required>
+                        <input type="text" id="filmDuration" placeholder="ex: 2h30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Note</label>
+                        <input type="number" id="filmRating" min="0" max="10" step="0.1">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Note</label>
-                    <input type="number" id="filmRating" min="0" max="10" step="0.1">
+                    <label>Affiche *</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="filmPoster" readonly placeholder="images/monfilm.jpg" required>
+                        <button type="button" class="btn-file" onclick="document.getElementById('posterFileInput').click()">
+                            <i class="fas fa-folder-open"></i> Choisir
+                        </button>
+                        <input type="file" id="posterFileInput" accept="image/*" style="display:none" onchange="handleFileSelect('poster')">
+                    </div>
+                    <small>Placez l'image dans le dossier <code>images/</code> puis sélectionnez-la.</small>
                 </div>
-                <div class="form-group">
-                    <label>URL Affiche *</label>
-                    <input type="url" id="filmPoster" required>
+
+                <div class="form-group" id="videoGroup">
+                    <label>Vidéo *</label>
+                    <div class="file-input-wrapper">
+                        <input type="text" id="filmVideo" readonly placeholder="videos/monfilm.mp4" required>
+                        <button type="button" class="btn-file" onclick="document.getElementById('videoFileInput').click()">
+                            <i class="fas fa-folder-open"></i> Choisir
+                        </button>
+                        <input type="file" id="videoFileInput" accept="video/*" style="display:none" onchange="handleFileSelect('video')">
+                    </div>
+                    <small>Placez la vidéo dans le dossier <code>videos/</code> puis sélectionnez-la.</small>
                 </div>
                 <div class="form-group">
                     <label>Réalisateur</label>
@@ -159,6 +558,317 @@
     <script src="js/auth.js"></script>
     <script src="js/films.js"></script>
     <script src="js/theme.js"></script>
-    <script src="js/admin.js"></script>
+    <script>
+
+        function importFilmsJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.films && Array.isArray(data.films)) {
+                        // Remplacer les films dans filmManager et sauvegarder dans localStorage
+                        filmManager.films = data.films;
+                        filmManager.save();
+                        alert('✅ Films importés avec succès !');
+                        loadFilmsTable(); // Rafraîchir le tableau
+                        if (document.getElementById('statsSection').classList.contains('active')) {
+                            loadStats();
+                        }
+                    } else {
+                        alert('❌ Format invalide : le fichier doit contenir une clé "films".');
+                    }
+                } catch (error) {
+                    alert('❌ Erreur de lecture du fichier JSON.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportFilmsJSON() {
+            const films = filmManager.getAll();
+            const data = { films: films };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'films.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function handleFileSelect(type) {
+            const inputId = type === 'poster' ? 'posterFileInput' : 'videoFileInput';
+            const targetId = type === 'poster' ? 'filmPoster' : 'filmVideo';
+            const folder = type === 'poster' ? 'images/' : 'videos/';
+            const fileInput = document.getElementById(inputId);
+            const targetInput = document.getElementById(targetId);
+
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                targetInput.value = folder + fileName;
+            }
+        }
+
+        function importUsersJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.users && Array.isArray(data.users)) {
+                        // Remplacer les utilisateurs dans auth (et sauver dans localStorage)
+                        auth.users = data.users;
+                        auth.saveUsers();
+                        alert('✅ Utilisateurs importés avec succès !');
+                        loadUsersTable(); // rafraîchir le tableau
+                    } else {
+                        alert('Format invalide');
+                    }
+                } catch (error) {
+                    alert('Erreur de lecture du fichier');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportUsersJSON() {
+            const users = auth.getAllUsers();
+            const data = { users: users };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'users.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Vérification admin simple
+        if (!getCurrentUser() || !getCurrentUser().isAdmin) {
+            // Rediriger vers home avec demande de mot de passe
+            window.location.href = 'home.html';
+        }
+
+        // Afficher le nom de l'admin
+        const user = getCurrentUser();
+        if (user) {
+            document.getElementById('adminNameDisplay').textContent = user.name;
+        }
+
+        // Navigation sidebar
+        const sidebarBtns = document.querySelectorAll('.sidebar-btn');
+        const sections = document.querySelectorAll('.admin-section');
+
+        sidebarBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Désactiver tous
+                sidebarBtns.forEach(b => b.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+
+                // Activer le cliqué
+                btn.classList.add('active');
+                const sectionId = btn.dataset.section + 'Section';
+                document.getElementById(sectionId).classList.add('active');
+
+                // Charger les données correspondantes
+                if (btn.dataset.section === 'films') loadFilmsTable();
+                else if (btn.dataset.section === 'users') loadUsersTable();
+                else if (btn.dataset.section === 'stats') loadStats();
+            });
+        });
+
+        // Charger les films dans le tableau
+        async function loadFilmsTable() {
+            await filmManager.init();
+            const films = filmManager.getAll();
+            const tbody = document.getElementById('filmsTableBody');
+            
+            if (films.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-secondary);">Aucun film trouvé</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = films.map(f => `
+                <tr>
+                    <td>${f.id}</td>
+                    <td><img src="${f.poster}" width="40" height="55" style="object-fit:cover;border-radius:4px;" onerror="this.src='https://via.placeholder.com/40x55'"></td>
+                    <td><strong>${f.title}</strong></td>
+                    <td><span class="badge-type ${f.type || 'film'}">${f.type === 'serie' ? 'Série' : 'Film'}</span></td>
+                    <td>${f.genre}</td>
+                    <td>${f.year}</td>
+                    <td>⭐ ${f.rating}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn-icon-sm" onclick="editFilm(${f.id})" title="Modifier"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon-sm" onclick="deleteFilm(${f.id})" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Charger les utilisateurs
+        function loadUsersTable() {
+            const users = auth.getAllUsers();
+            const tbody = document.getElementById('usersTableBody');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--text-secondary);">Aucun utilisateur inscrit</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td><strong>${u.name}</strong></td>
+                    <td>${u.email}</td>
+                    <td>${new Date(u.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Charger les statistiques
+        async function loadStats() {
+            await filmManager.init();
+            const films = filmManager.getAll();
+            const users = auth.getAllUsers();
+            
+            document.getElementById('totalFilmsStat').textContent = films.length;
+            document.getElementById('totalUsersStat').textContent = users.length;
+            // Simulation téléchargements (pour l'exemple)
+            document.getElementById('totalDownloadsStat').textContent = Math.floor(Math.random() * 50) + 10;
+        }
+
+        function deleteFilm(id) {
+            if (confirm('Supprimer ce film ?')) {
+                filmManager.delete(id);
+                loadFilmsTable();
+                if (document.getElementById('statsSection').classList.contains('active')) {
+                    loadStats();
+                }
+            }
+        }
+
+        // Afficher le modal d'ajout
+        function showAddFilmForm() {
+            document.getElementById('modalTitle').textContent = 'Ajouter un film / série';
+            document.getElementById('filmId').value = '';
+            document.getElementById('filmForm').reset();
+            document.getElementById('filmType').value = 'film';
+            toggleVideoField(); // mettre à jour le champ vidéo
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        // Afficher le modal en mode édition (pré-remplissage)
+        function editFilm(id) {
+            const film = filmManager.getById(id);
+            if (!film) return;
+
+            document.getElementById('modalTitle').textContent = 'Modifier le film / série';
+            document.getElementById('filmId').value = film.id;
+            document.getElementById('filmTitle').value = film.title || '';
+            document.getElementById('filmType').value = film.type || 'film';
+            document.getElementById('filmGenre').value = film.genre || '';
+            document.getElementById('filmYear').value = film.year || '';
+            document.getElementById('filmDuration').value = film.duration || '';
+            document.getElementById('filmRating').value = film.rating || '';
+            document.getElementById('filmPoster').value = film.poster || '';
+            document.getElementById('filmVideo').value = film.video || (film.episodes && film.episodes[0] ? film.episodes[0].video : '');
+            document.getElementById('filmDirector').value = film.director || '';
+            document.getElementById('filmDescription').value = film.description || '';
+            document.getElementById('filmCast').value = film.cast ? film.cast.join(', ') : '';
+
+            toggleVideoField();
+            document.getElementById('adminModal').classList.add('active');
+        }
+
+        // Fermer le modal
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        // Gérer la soumission du formulaire
+        async function handleFilmSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('filmId').value;
+            const type = document.getElementById('filmType').value;
+            const videoUrl = document.getElementById('filmVideo').value;
+
+            // Construire l'objet film de base
+            const filmData = {
+                title: document.getElementById('filmTitle').value,
+                type: type,
+                genre: document.getElementById('filmGenre').value,
+                year: parseInt(document.getElementById('filmYear').value),
+                duration: document.getElementById('filmDuration').value,
+                rating: parseFloat(document.getElementById('filmRating').value) || 0,
+                poster: document.getElementById('filmPoster').value,
+                director: document.getElementById('filmDirector').value,
+                description: document.getElementById('filmDescription').value,
+                cast: document.getElementById('filmCast').value.split(',').map(s => s.trim()).filter(Boolean)
+            };
+
+            if (type === 'film') {
+                // Pour un film, on utilise directement le champ video
+                filmData.video = videoUrl;
+            } else {
+                // Pour une série, on crée un épisode par défaut avec la vidéo fournie
+                filmData.episodes = [
+                    {
+                        episodeNumber: 1,
+                        season: 1,
+                        title: filmData.title + ' - Épisode 1',
+                        duration: filmData.duration,
+                        poster: filmData.poster, // On reprend la même affiche pour l'épisode (peut être changé plus tard)
+                        video: videoUrl,
+                        description: filmData.description
+                    }
+                ];
+                // On retire la durée globale pour éviter la confusion (elle sera gérée par les épisodes)
+                delete filmData.duration;
+            }
+
+            if (id) {
+                // Mode modification
+                filmManager.update(parseInt(id), filmData);
+            } else {
+                // Mode ajout
+                filmManager.add(filmData);
+            }
+
+            closeAdminModal();
+            loadFilmsTable();  // Rafraîchir le tableau
+            if (document.getElementById('statsSection').classList.contains('active')) {
+                loadStats();   // Rafraîchir les stats si on est sur cette section
+            }
+        }
+
+        // Adapter le champ vidéo en fonction du type sélectionné
+        function toggleVideoField() {
+            const type = document.getElementById('filmType').value;
+            const videoGroup = document.getElementById('videoGroup');
+            const videoInput = document.getElementById('filmVideo');
+            
+            if (type === 'serie') {
+                videoGroup.querySelector('label').textContent = 'URL Vidéo (Épisode 1) *';
+                videoInput.placeholder = 'Vidéo du premier épisode';
+            } else {
+                videoGroup.querySelector('label').textContent = 'URL Vidéo *';
+                videoInput.placeholder = '';
+            }
+        }
+
+        // Initialisation au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            // Charger la section active par défaut (Films)
+            loadFilmsTable();
+        });
+    </script>
 </body>
 </html>

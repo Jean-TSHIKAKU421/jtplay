@@ -1,5 +1,5 @@
 // ============================================
-// AUTHENTIFICATION
+// AUTHENTIFICATION (localStorage)
 // ============================================
 
 const AUTH_KEY = 'cinevault_current_user';
@@ -44,21 +44,10 @@ class AuthManager {
     }
 
     login(email, password) {
-        // Vérifier admin
-        if (password === ADMIN_PASSWORD) {
-            return {
-                id: 'admin',
-                name: 'Administrateur',
-                email: email || 'admin@cinevault.com',
-                isAdmin: true
-            };
-        }
-
         const user = this.findUser(email);
         if (!user || user.password !== password) {
             throw new Error('Email ou mot de passe incorrect');
         }
-
         return user;
     }
 
@@ -93,7 +82,7 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Vérifier l'authentification (sauf sur index.html et admin.html)
+// Vérifier l'authentification sur les pages protégées
 const currentPage = window.location.pathname.split('/').pop();
 if (currentPage !== 'index.html' && currentPage !== 'admin.html' && currentPage !== '') {
     if (!isLoggedIn()) {
@@ -112,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Gestion des tabs de l'auth card
     document.querySelectorAll('.auth-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
@@ -120,13 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Gestion de la visibilité du mot de passe
+    // Visibilité mot de passe
     document.querySelectorAll('.toggle-password').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetId = btn.dataset.target;
             const input = document.getElementById(targetId);
             const icon = btn.querySelector('i');
-            
+
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.className = 'fas fa-eye-slash';
@@ -137,13 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Gestion du formulaire de connexion
+    // Formulaire de connexion
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
     }
 
-    // Gestion du formulaire d'inscription
+    // Formulaire d'inscription
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', handleRegister);
@@ -176,12 +164,7 @@ function handleLogin(e) {
     try {
         const user = auth.login(email, password);
         setCurrentUser(user);
-        
-        if (user.isAdmin) {
-            window.location.href = 'admin.html';
-        } else {
-            window.location.href = 'home.html';
-        }
+        window.location.href = 'home.html';
     } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.style.display = 'block';
@@ -208,9 +191,9 @@ function handleRegister(e) {
         auth.register(name, email, password);
         successDiv.textContent = '✅ Compte créé avec succès ! Vous pouvez vous connecter.';
         successDiv.style.display = 'block';
-        
+
         document.getElementById('registerForm').reset();
-        
+
         setTimeout(() => {
             switchAuthTab('login');
             document.getElementById('loginEmail').value = email;

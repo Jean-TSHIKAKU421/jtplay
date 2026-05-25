@@ -1,5 +1,5 @@
 // ============================================
-// GESTION DES FILMS
+// GESTION DES FILMS (localStorage)
 // ============================================
 
 const FILMS_KEY = 'cinevault_films';
@@ -10,35 +10,30 @@ class FilmManager {
     }
 
     async init() {
+        // Essayer de charger depuis le localStorage
+        const stored = localStorage.getItem(FILMS_KEY);
+        if (stored) {
+            this.films = JSON.parse(stored);
+            return;
+        }
+
+        // Sinon charger depuis le fichier JSON local
         try {
             const response = await fetch('data/films.json');
-            
-            if (!response.ok) {
-                throw new Error('Fichier films.json introuvable');
+            if (response.ok) {
+                const data = await response.json();
+                this.films = data.films || [];
+                this.save();
             }
-            
-            const data = await response.json();
-            this.films = data.films || [];
-            this.save();
-            return true;
-            
         } catch (error) {
-            console.error('Erreur de chargement:', error);
+            console.error('Erreur chargement films:', error);
             this.showError('Erreur de chargement des films. Utilisation des données locales.');
-            
-            const stored = localStorage.getItem(FILMS_KEY);
-            if (stored) {
-                this.films = JSON.parse(stored);
-                return true;
-            }
-            
-            return false;
+            this.films = [];
         }
     }
 
     showError(message) {
         let errorDiv = document.getElementById('filmsError');
-        
         if (!errorDiv) {
             errorDiv = document.createElement('div');
             errorDiv.id = 'filmsError';
@@ -53,16 +48,13 @@ class FilmManager {
                 align-items: center;
                 gap: 8px;
             `;
-            
             const filmsSection = document.querySelector('.films-section');
             if (filmsSection) {
                 filmsSection.parentNode.insertBefore(errorDiv, filmsSection);
             }
         }
-        
         errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
         errorDiv.style.display = 'flex';
-        
         setTimeout(() => {
             errorDiv.style.display = 'none';
         }, 5000);
@@ -82,7 +74,7 @@ class FilmManager {
 
     search(query) {
         const term = query.toLowerCase();
-        return this.films.filter(f => 
+        return this.films.filter(f =>
             f.title.toLowerCase().includes(term) ||
             f.genre.toLowerCase().includes(term) ||
             (f.director && f.director.toLowerCase().includes(term))
@@ -100,7 +92,7 @@ class FilmManager {
             ...filmData,
             rating: parseFloat(filmData.rating) || 0,
             year: parseInt(filmData.year),
-            cast: typeof filmData.cast === 'string' 
+            cast: typeof filmData.cast === 'string'
                 ? filmData.cast.split(',').map(s => s.trim()).filter(Boolean)
                 : (filmData.cast || [])
         };
@@ -134,12 +126,18 @@ class FilmManager {
 
 const filmManager = new FilmManager();
 
+// Variables globales pour les filtres et le hero
+let currentType = 'all';
+let currentGenre = null;
+let currentHeroFilmId = null;
+let heroInterval = null;
+
 // Créer une carte de film
 function createFilmCard(film, index) {
     return `
         <div class="film-card" onclick="openFilmModal(${film.id})" style="transition-delay: ${index * 0.05}s;">
             <div class="film-poster">
-                <img src="${film.poster}" alt="${film.title}" loading="lazy" 
+                <img src="${film.poster}" alt="${film.title}" loading="lazy"
                      onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
                 <div class="film-rating">
                     <i class="fas fa-star"></i> ${film.rating}
@@ -172,7 +170,7 @@ function hideLoader() {
     }
 }
 
-// Animer les cartes une par une
+// Animer les cartes
 function animateCards() {
     const cards = document.querySelectorAll('.film-card');
     cards.forEach((card, index) => {
@@ -182,59 +180,86 @@ function animateCards() {
     });
 }
 
+// Filtrer les films selon le type et le genre
 function getFilteredFilms() {
     let films = filmManager.getAll();
-    
-    // Filtrer par type (film/serie)
+
     if (currentType === 'film') {
         films = films.filter(f => f.type === 'film');
     } else if (currentType === 'serie') {
         films = films.filter(f => f.type === 'serie');
     }
-    
-    // Filtrer par genre
+
     if (currentGenre) {
         films = films.filter(f => f.genre === currentGenre);
     }
-    
+
     return films;
 }
 
-// Charger et afficher les films
+// Charger les films dans l'UI
 async function loadFilmsToUI() {
-    const success = await filmManager.init();
-    
-    if (!success) {
-        hideLoader();
-        const grid = document.getElementById('filmsGrid');
-        if (grid) {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Aucun film disponible.</p>';
-        }
-        return;
-    }
-    
+    await filmManager.init();
+
     const films = getFilteredFilms();
-    
     const grid = document.getElementById('filmsGrid');
     const count = document.getElementById('filmsCount');
-    
+
     if (grid) {
-        grid.innerHTML = films.length > 0 
+        grid.innerHTML = films.length > 0
             ? films.map((film, i) => createFilmCard(film, i)).join('')
             : '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Aucun film trouvé</p>';
     }
-    
+
     if (count) {
         count.textContent = `${films.length} film${films.length > 1 ? 's' : ''}`;
     }
-    
+
     hideLoader();
     setTimeout(() => {
         animateCards();
     }, 100);
 }
 
-// Ouvrir le modal de détails
+// Recherche et affichage
+function searchAndDisplay(query) {
+    const heroSection = document.getElementById('heroSection');
+
+    if (!query.trim()) {
+        if (heroSection) heroSection.classList.remove('hidden');
+        loadFilmsToUI();
+        return;
+    }
+
+    if (heroSection) heroSection.classList.add('hidden');
+
+    let results = filmManager.search(query);
+
+    if (currentType === 'film') {
+        results = results.filter(f => f.type === 'film');
+    } else if (currentType === 'serie') {
+        results = results.filter(f => f.type === 'serie');
+    }
+    if (currentGenre) {
+        results = results.filter(f => f.genre === currentGenre);
+    }
+
+    const grid = document.getElementById('filmsGrid');
+    const count = document.getElementById('filmsCount');
+
+    if (grid) {
+        grid.innerHTML = results.length > 0
+            ? results.map((film, i) => createFilmCard(film, i)).join('')
+            : '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 2rem;">Aucun film trouvé</p>';
+        setTimeout(animateCards, 50);
+    }
+
+    if (count) {
+        count.textContent = `${results.length} film${results.length > 1 ? 's' : ''}`;
+    }
+}
+
+// Modal de détails
 function openFilmModal(filmId) {
     const film = filmManager.getById(filmId);
     if (!film) return;
@@ -246,7 +271,7 @@ function openFilmModal(filmId) {
 
     modalBody.innerHTML = `
         <div style="display: flex; gap: 2rem;">
-            <img src="${film.poster}" alt="${film.title}" 
+            <img src="${film.poster}" alt="${film.title}"
                  style="width: 250px; border-radius: 12px; object-fit: cover;"
                  onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
             <div>
@@ -271,34 +296,80 @@ function openFilmModal(filmId) {
     modalOverlay.onclick = closeModal;
 }
 
-// Recherche avec animation
-function searchAndDisplay(query) {
-    let results = filmManager.search(query);
-    
-    // Appliquer les filtres actuels
-    if (currentType === 'film') {
-        results = results.filter(f => f.type === 'film');
-    } else if (currentType === 'serie') {
-        results = results.filter(f => f.type === 'serie');
-    }
-    
-    if (currentGenre) {
-        results = results.filter(f => f.genre === currentGenre);
-    }
-    
-    const grid = document.getElementById('filmsGrid');
-    if (grid) {
-        grid.innerHTML = results.length > 0
-            ? results.map((film, i) => createFilmCard(film, i)).join('')
-            : '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Aucun film trouvé</p>';
-        
-        animateCards();
+// Scroll vers le film dans la grille
+function scrollToFilm(filmId) {
+    const cards = document.querySelectorAll('.film-card');
+    let targetCard = null;
+
+    cards.forEach(card => {
+        if (card.onclick && card.onclick.toString().includes(`openFilmModal(${filmId})`)) {
+            targetCard = card;
+        }
+    });
+
+    if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetCard.style.boxShadow = '0 0 0 4px var(--primary)';
+        targetCard.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+            targetCard.style.boxShadow = '';
+            targetCard.style.transform = '';
+        }, 1500);
     }
 }
 
-// Variables pour les filtres
-let currentType = 'all';
-let currentGenre = null;
+// Hero aléatoire
+function updateHero(film) {
+    if (!film) return;
+
+    currentHeroFilmId = film.id;
+
+    const heroBg = document.getElementById('heroBg');
+    const heroContent = document.getElementById('heroContent');
+
+    heroContent.classList.remove('visible');
+
+    const img = new Image();
+    img.src = film.poster;
+    img.onload = () => {
+        heroBg.style.backgroundImage = `url('${film.poster}')`;
+        heroBg.classList.add('active');
+
+        document.getElementById('heroTitle').textContent = film.title;
+        document.getElementById('heroDescription').textContent = film.description || '';
+        document.getElementById('heroRating').textContent = film.rating;
+        document.getElementById('heroDuration').textContent = film.duration;
+        document.getElementById('heroYear').textContent = film.year;
+        document.getElementById('heroGenre').textContent = film.genre;
+
+        setTimeout(() => {
+            heroContent.classList.add('visible');
+        }, 200);
+    };
+
+    if (img.complete) {
+        img.onload();
+    }
+}
+
+function randomizeHero() {
+    const films = filmManager.getAll();
+    if (films.length === 0) return;
+    const randomFilm = films[Math.floor(Math.random() * films.length)];
+    updateHero(randomFilm);
+}
+
+function startHeroRotation(intervalMs = 8000) {
+    stopHeroRotation();
+    heroInterval = setInterval(randomizeHero, intervalMs);
+}
+
+function stopHeroRotation() {
+    if (heroInterval) {
+        clearInterval(heroInterval);
+        heroInterval = null;
+    }
+}
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', async () => {
@@ -316,6 +387,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Charger les films
         await loadFilmsToUI();
 
+        // Initialiser le hero
+        randomizeHero();
+        startHeroRotation(8000);
+
         // Recherche
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
@@ -324,17 +399,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Catégories principales (Tout / Mono-film / Séries)
+        // Catégories principales
         document.querySelectorAll('#mainCategories .category-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 document.querySelectorAll('#mainCategories .category-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
+
                 currentType = btn.dataset.type;
                 currentGenre = null;
-                
+
                 const subSection = document.getElementById('subCategoriesSection');
-                
                 if (currentType === 'all') {
                     subSection.style.display = 'none';
                 } else {
@@ -342,46 +416,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.querySelectorAll('#subCategories .category-btn').forEach(b => b.classList.remove('active'));
                     document.querySelector('#subCategories .category-btn[data-genre="all"]').classList.add('active');
                 }
-                
+
+                document.getElementById('searchInput').value = '';
+                const heroSection = document.getElementById('heroSection');
+                if (heroSection) heroSection.classList.remove('hidden');
+
                 await loadFilmsToUI();
             });
         });
 
-        // Sous-catégories (genres)
+        // Sous-catégories
         document.querySelectorAll('#subCategories .category-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 document.querySelectorAll('#subCategories .category-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
+
                 currentGenre = btn.dataset.genre === 'all' ? null : btn.dataset.genre;
-                
+
+                document.getElementById('searchInput').value = '';
+                const heroSection = document.getElementById('heroSection');
+                if (heroSection) heroSection.classList.remove('hidden');
+
                 await loadFilmsToUI();
             });
         });
     }
 });
-
-function scrollToFilm(filmId) {
-    // Chercher la carte du film dans la grille
-    const cards = document.querySelectorAll('.film-card');
-    let targetCard = null;
-    
-    cards.forEach(card => {
-        if (card.onclick && card.onclick.toString().includes(`openFilmModal(${filmId})`)) {
-            targetCard = card;
-        }
-    });
-    
-    if (targetCard) {
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Faire clignoter la carte pour attirer l'attention
-        targetCard.style.boxShadow = '0 0 0 4px var(--primary)';
-        targetCard.style.transform = 'scale(1.05)';
-        
-        setTimeout(() => {
-            targetCard.style.boxShadow = '';
-            targetCard.style.transform = '';
-        }, 1500);
-    }
-}
